@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static MCUtils.NBTContent;
 
 namespace HMConMC
 {
@@ -109,7 +108,7 @@ namespace HMConMC
 		private void CreateWorld(string worldName)
 		{
 			world = new World(desiredVersion, regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
-			world.worldName = worldName;
+			world.WorldName = worldName;
 			MakeBaseTerrain();
 			DecorateTerrain();
 		}
@@ -168,7 +167,7 @@ namespace HMConMC
 					var mapExporter = new OverviewmapExporter(this, true, HeightmapType.SolidBlocksNoLiquid);
 					mapExporter.WriteFile(mapStream, mapPath);
 				}
-				world.WriteWorldSave(path, regionOffsetX * 512 + 50, regionOffsetZ * 512 + 50);
+				world.WriteWorldSave(path);
 			}
 			else
 			{
