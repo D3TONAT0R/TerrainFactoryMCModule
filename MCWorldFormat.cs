@@ -17,7 +17,7 @@ namespace HMConMC
 
 		protected override bool ExportFile(string path, ExportJob job)
 		{
-			new MCWorldExporter(job).WriteFile(path, null, this);
+			new MCWorldExporter(job, true, true).WriteFile(path, null, this);
 			return true;
 		}
 	}
