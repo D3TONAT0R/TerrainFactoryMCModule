@@ -9,8 +9,9 @@ namespace HMConMC {
 	public class MCCommandHandler : HMConCommandHandler {
 
 		public override void AddCommands(List<ConsoleCommand> list) {
-			list.Add(new ConsoleCommand("mcaoffset", "X Z", "[MCA] Apply offset to region terrain, in regions (512)", HandleOffsetCmd));
-			list.Add(new ConsoleCommand("mcpostprocess", "", "[MCA] Run various world generators defined in a separate XML file", HandlePostProcessingCmd));
+			list.Add(new ConsoleCommand("mcaoffset", "X Z", "[MC*] Apply offset to region terrain, in regions (512)", HandleOffsetCmd));
+			list.Add(new ConsoleCommand("mcpostprocess", "", "[MC*] Run various world generators defined in a separate XML file", HandlePostProcessingCmd));
+			list.Add(new ConsoleCommand("mcvoid", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world", HandleVoidGenCmd));
 		}
 
 		private bool HandleOffsetCmd(Job job, string[] args) {
@@ -37,6 +38,22 @@ namespace HMConMC {
 				bool b2 = job.exportSettings.ToggleCustomBoolSetting("mcpostprocess");
 				ConsoleOutput.WriteLine("MC World Post Processing " + (b2 ? "enabled" : "disabled"));
 			}
+			return true;
+		}
+
+		private bool HandleVoidGenCmd(Job job, string[] args)
+		{
+			bool value;
+			if(args.Length > 0 && int.TryParse(args[0], out int i))
+			{
+				value = i > 0;
+			}
+			else
+			{
+				value = !job.exportSettings.GetCustomSetting("mcVoidGen", false);
+			}
+			job.exportSettings.SetCustomSetting("mcVoidGen", value);
+			ConsoleOutput.WriteLine("MC void world generation " + (value ? "enabled" : "disabled"));
 			return true;
 		}
 	}

@@ -29,6 +29,7 @@ namespace HMConMC
 
 		public int regionOffsetX;
 		public int regionOffsetZ;
+		public bool generateVoid;
 
 		public int heightmapLengthX;
 		public int heightmapLengthZ;
@@ -41,6 +42,7 @@ namespace HMConMC
 		{
 			regionOffsetX = job.exportNumX + job.settings.GetCustomSetting("mcaOffsetX", 0);
 			regionOffsetZ = job.exportNumZ + job.settings.GetCustomSetting("mcaOffsetZ", 0);
+			generateVoid = job.settings.GetCustomSetting("mcVoidGen", false);
 			if(job.settings.HasCustomSetting<string>("version"))
 			{
 				desiredVersion = MCUtils.Version.Parse(job.settings.GetCustomSetting("version", "")); 
@@ -108,6 +110,10 @@ namespace HMConMC
 		private void CreateWorld(string worldName)
 		{
 			world = new World(desiredVersion, regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
+			if(generateVoid)
+			{
+				world.levelData.worldGen.OverworldGenerator = LevelData.DimensionGenerator.CreateSuperflatOverworldGenerator(BiomeID.the_void, new LevelData.SuperflatLayer("minecraft:air", 1));
+			}
 			world.WorldName = worldName;
 			MakeBaseTerrain();
 			DecorateTerrain();
