@@ -9,6 +9,7 @@ namespace HMConMC {
 	public class MCCommandHandler : HMConCommandHandler {
 
 		public override void AddCommands(List<ConsoleCommand> list) {
+			list.Add(new ConsoleCommand("mcversion", "<Version>", "[MC*] Change target minecraft version", HandleVersionCmd));
 			list.Add(new ConsoleCommand("mcaoffset", "X Z", "[MC*] Apply offset to region terrain, in regions (512)", HandleOffsetCmd));
 			list.Add(new ConsoleCommand("mcpostprocess", "", "[MC*] Run various world generators defined in a separate XML file", HandlePostProcessingCmd));
 			list.Add(new ConsoleCommand("mcvoid", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world", HandleVoidGenCmd));
@@ -54,6 +55,22 @@ namespace HMConMC {
 			}
 			job.exportSettings.SetCustomSetting("mcVoidGen", value);
 			ConsoleOutput.WriteLine("MC void world generation " + (value ? "enabled" : "disabled"));
+			return true;
+		}
+
+		private bool HandleVersionCmd(Job job, string[] args)
+		{
+			if(args.Length > 0)
+			{
+				Version v = Version.Parse(args[0]);
+				job.exportSettings.SetCustomSetting("mcVersion", v);
+				ConsoleOutput.WriteLine("MC world version set to " + v.ToString());
+			}
+			else
+			{
+				job.exportSettings.RemoveCustomSetting("mcVersion");
+				ConsoleOutput.WriteLine("MC world version reset to default.");
+			}
 			return true;
 		}
 	}

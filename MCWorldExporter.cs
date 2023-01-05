@@ -43,9 +43,9 @@ namespace HMConMC
 			regionOffsetX = job.exportNumX + job.settings.GetCustomSetting("mcaOffsetX", 0);
 			regionOffsetZ = job.exportNumZ + job.settings.GetCustomSetting("mcaOffsetZ", 0);
 			generateVoid = job.settings.GetCustomSetting("mcVoidGen", false);
-			if(job.settings.HasCustomSetting<string>("version"))
+			if(job.settings.HasCustomSetting<string>("mcVersion"))
 			{
-				desiredVersion = MCUtils.Version.Parse(job.settings.GetCustomSetting("version", "")); 
+				desiredVersion = MCUtils.Version.Parse(job.settings.GetCustomSetting("mcVersion", "")); 
 			}
 			else
 			{
