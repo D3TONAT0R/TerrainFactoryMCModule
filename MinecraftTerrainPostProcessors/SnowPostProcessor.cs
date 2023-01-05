@@ -67,46 +67,41 @@ namespace HMConMC.PostProcessors.Splatmapper
 
 		protected override void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
 		{
-			var biome = world.GetBiome(x, z);
+			if(x == 1432 && z == 1352)
+			{
+				Console.WriteLine("x");
+			}
+			var biome = world.GetBiome(x, y, z);
 			if (biome.HasValue)
 			{
 				if (!topOnly)
 				{
-					FreezeBlock(world, x, y, z, mask);
+					FreezeBlock(world, x, y, z, mask, biome.Value);
 				}
 				int y2 = world.GetHighestBlock(x, z, HeightmapType.SolidBlocks);
 				if (topOnly || y2 > y)
 				{
-					FreezeBlock(world, x, y2, z, mask);
+					FreezeBlock(world, x, y2, z, mask, biome.Value);
 				}
 			}
 		}
 
-		private bool IsAboveBiomeThreshold(World world, int x, int y, int z)
+		private bool IsAboveBiomeThreshold(BiomeID biome, int y)
 		{
-			var biome = world.GetBiome(x, z);
-			if (biome.HasValue)
+			if (snowThresholds.TryGetValue(biome, out short threshold))
 			{
-				if (snowThresholds.TryGetValue(biome.Value, out short threshold))
-				{
-					return y >= threshold;
-				}
-				else
-				{
-					//If the biome doesn't exist in the dictionary, it can't generate snow.
-					return false;
-				}
+				return y >= threshold;
 			}
 			else
 			{
-				//No biome was found, this shouldn't happen normally.
-				throw new NullReferenceException("Attempted to read biome information where no biome information was present.");
+				//If the biome doesn't exist in the dictionary, it can't generate snow.
+				return false;
 			}
 		}
 
-		private void FreezeBlock(World world, int x, int y, int z, float mask, bool airCheck = true, bool biomeCheck = true)
+		private void FreezeBlock(World world, int x, int y, int z, float mask, BiomeID? biome, bool airCheck = true)
 		{
-			if (biomeCheck && !IsAboveBiomeThreshold(world, x, y, z)) return;
+			if (biome.HasValue && !IsAboveBiomeThreshold(biome.Value, y)) return;
 			bool canFreeze = !airCheck || world.IsAir(x, y + 1, z);
 			if (!canFreeze) return;
 			var block = world.GetBlock(x, y, z);
@@ -120,8 +115,8 @@ namespace HMConMC.PostProcessors.Splatmapper
 			}
 			else
 			{
-				if (mask >= 1 || random.NextDouble() <= mask)
-				{
+				//if (mask >= 1 || random.NextDouble() <= mask)
+				//{
 					if (block.IsLiquid || block.CompareMultiple("minecraft:snow", "minecraft:ice")) return;
 					world.SetBlock(x, y + 1, z, snowLayerBlock);
 					//Add "snowy" tag on blocks that support it.
@@ -137,7 +132,7 @@ namespace HMConMC.PostProcessors.Splatmapper
 					{
 						world.SetBlock(x, y, z, snowyMycelium);
 					}
-				}
+				//}
 			}
 		}
 	}
