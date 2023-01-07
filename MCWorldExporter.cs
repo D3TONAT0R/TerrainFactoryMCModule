@@ -67,9 +67,9 @@ namespace HMConMC
 			}
 			regionNumX = (int)Math.Ceiling(heightmapLengthX / 512f);
 			regionNumZ = (int)Math.Ceiling(heightmapLengthZ / 512f);
-			if (heightmapLengthX % 512 > 0 || heightmapLengthZ % 512 > 0)
+			if (heightmapLengthX % 16 > 0 || heightmapLengthZ % 16 > 0)
 			{
-				ConsoleOutput.WriteWarning("Input heightmap is not a multiple of 512. Void borders will be present in the world.");
+				ConsoleOutput.WriteWarning("Input heightmap is not a multiple of 16. Void borders will be present in the world.");
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace HMConMC
 						{
 							for (int y = 0; y <= heightmap[x, z]; y++)
 							{
-								world.SetDefaultBlock(regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z);
+								world.SetDefaultBlock(regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z, true);
 							}
 						}
 					}
