@@ -10,7 +10,7 @@ namespace HMConMC.PostProcessors
 
 		public BlockState block;
 		public int veinSizeMax = 10;
-		public float spawnsPerColumn = 4;
+		public float spawnsPerChunk = 4;
 		public int heightMin = 1;
 		public int heightMax = 32;
 
@@ -18,7 +18,7 @@ namespace HMConMC.PostProcessors
 		{
 			this.block = new BlockState(BlockList.Find(block));
 			veinSizeMax = veinSize;
-			spawnsPerColumn = rarityPerChunk / 256f;
+			spawnsPerChunk = rarityPerChunk / 256f;
 			heightMin = yMin;
 			heightMax = yMax;
 		}
@@ -27,7 +27,8 @@ namespace HMConMC.PostProcessors
 		{
 			block = new BlockState(BlockList.Find(elem.Element("block").Value));
 			elem.TryParseInt("size", ref veinSizeMax);
-			elem.TryParseFloat("rarity", ref spawnsPerColumn);
+			elem.TryParseFloat("rarity", ref spawnsPerChunk);
+			spawnsPerChunk /= 256f;
 			elem.TryParseInt("y-min", ref heightMin);
 			elem.TryParseInt("y-max", ref heightMax);
 		}

@@ -19,7 +19,7 @@ namespace HMConMC.PostProcessors.Splatmapper
 			{
 				foreach(var ore in ores)
 				{
-					if (Chance(random, ore.spawnsPerColumn * multiplier * mask))
+					if (Chance(random, ore.spawnsPerChunk * multiplier * mask))
 					{
 						ore.Generate(world, random, x, z);
 					}
