@@ -143,13 +143,14 @@ namespace HMConMC.PostProcessors
 		{
 			foreach (var l in layers)
 			{
+				float layerMask = mask;
 				if (l.Key > -1)
 				{
-					mask *= weightmap.GetValue(x, z, l.Key);
+					layerMask *= weightmap.GetValue(x, z, l.Key);
 				}
-				if (mask > 0.001f)
+				if (layerMask > 0.001f)
 				{
-					l.Value.ProcessBlockColumn(world, random, x, y, z, mask);
+					l.Value.ProcessBlockColumn(world, random, x, y, z, layerMask);
 				}
 			}
 		}
