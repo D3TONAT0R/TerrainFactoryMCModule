@@ -167,12 +167,6 @@ namespace HMConMC
 					var mapExporter = new OverviewmapExporter(this, true);
 					mapExporter.WriteFile(mapStream, mapPath);
 				}
-				mapPath = Path.Combine(path, "overviewmap_no-water.png");
-				using (var mapStream = new FileStream(mapPath, FileMode.Create))
-				{
-					var mapExporter = new OverviewmapExporter(this, true, HeightmapType.SolidBlocksNoLiquid);
-					mapExporter.WriteFile(mapStream, mapPath);
-				}
 				world.WriteWorldSave(path);
 			}
 			else
