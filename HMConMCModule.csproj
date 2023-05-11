@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors></Authors>
     <Company></Company>
@@ -10,12 +10,12 @@
     <Product />
     <RootNamespace>HMConMC</RootNamespace>
     <AssemblyName>HMConMCModule</AssemblyName>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove=".gitattributes" />
     <None Remove=".gitignore" />
-    <None Remove="Resources\postprocess_default.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,29 +24,29 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\NoiseGenerator\NoiseGenerator.csproj" />
-    <ProjectReference Include="..\HMConImageModule\HMConImageModule.csproj" />
+    <ProjectReference Include="..\HMConImageModule\HMConImageModule.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
     <ProjectReference Include="..\..\MCUtils\MCUtils.csproj" />
-    <ProjectReference Include="..\HMCon\HMCon.csproj" />
+    <ProjectReference Include="..\HMCon\HMCon.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include=".gitattributes" />
-    <Resource Include="Resources\postprocess_default.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+    <None Update="Resources\postprocess_default.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="call $(SolutionDir)\HMCon\copy_modules.bat $(TargetDir) $(SolutionDir) $(Configuration) $(ProjectName)" />
+  </Target>
 
 </Project>

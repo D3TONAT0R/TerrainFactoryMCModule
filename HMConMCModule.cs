@@ -6,12 +6,16 @@ using HMCon.Util;
 using System;
 using System.Collections.Generic;
 
-namespace HMConMC {
+namespace HMConMC
+{
+	public class HMConMCModule : HMConModule
+	{
+		public override string ModuleID => "MinecraftWorldModule";
+		public override string ModuleName => "Minecraft World Generator / Importer";
+		public override string ModuleVersion => "0.9.6";
 
-	[ModuleInfo("MinecraftModule", "Minecraft World Generator / Importer v0.9.6")]
-	public class HMConMCModule : HMConModule {
-
-		public override HMConCommandHandler GetCommandHandler() {
+		public override HMConCommandHandler GetCommandHandler()
+		{
 			return new MCCommandHandler();
 		}
 
