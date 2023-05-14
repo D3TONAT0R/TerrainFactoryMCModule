@@ -20,8 +20,8 @@ namespace HMConMC.PostProcessors.Splatmapper
 		bool chunkMode = false;
 		float threshold = 0.5f;
 
-		public WorldMergerPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ)
-			: base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public WorldMergerPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ)
+			: base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			if (mask == null)
 			{

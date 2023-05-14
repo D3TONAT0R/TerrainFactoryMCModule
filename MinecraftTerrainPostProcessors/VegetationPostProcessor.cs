@@ -50,7 +50,7 @@ namespace HMConMC.PostProcessors {
 
 		public override PostProcessType PostProcessorType => PostProcessType.Surface;
 
-		public VegetationPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public VegetationPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			random = new Random();
 			grassChance = float.Parse(xml.Element("grass")?.Value ?? "0.2");

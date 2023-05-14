@@ -357,7 +357,7 @@ namespace HMConMC.PostProcessors
 		private Weightmap<float> weightmap;
 		private Dictionary<int, Layer> caveGenLayers = new Dictionary<int, Layer>();
 
-		public CavesPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public CavesPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			weightmap = LoadWeightmapAndLayers(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ, caveGenLayers, CreateCaveGenLayer);
 			if(weightmap == null)

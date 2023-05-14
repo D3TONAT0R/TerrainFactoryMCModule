@@ -1,4 +1,5 @@
 using HMCon;
+using HMCon.Export;
 using HMCon.Import;
 using HMConImage;
 using HMConMC.PostProcessors.Splatmapper;
@@ -16,24 +17,30 @@ namespace HMConMC.PostProcessors
 {
 	public class WorldPostProcessingStack
 	{
+		public readonly MCWorldExporter context;
 
 		public Dictionary<string, Schematic> schematics = new Dictionary<string, Schematic>();
 
 		public List<AbstractPostProcessor> generators = new List<AbstractPostProcessor>();
 
-		public static WorldPostProcessingStack CreateFromXML(string importedFilePath, string xmlFilePath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
+		public void CreateFromXML(string importedFilePath, string xmlFilePath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
 		{
 			var xmlString = File.ReadAllText(xmlFilePath);
-			return new WorldPostProcessingStack(Path.GetDirectoryName(importedFilePath), xmlString, ditherLimit, offsetX, offsetZ, sizeX, sizeZ);
+			Create(Path.GetDirectoryName(importedFilePath), xmlString, ditherLimit, offsetX, offsetZ, sizeX, sizeZ);
 		}
 
-		public static WorldPostProcessingStack CreateDefaultPostProcessor(string importedFilePath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
+		public void CreateDefaultPostProcessor(string importedFilePath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
 		{
 			var xmlString = File.ReadAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Resources", "postprocess_default.xml"));
-			return new WorldPostProcessingStack(Path.GetDirectoryName(importedFilePath), xmlString, ditherLimit, offsetX, offsetZ, sizeX, sizeZ);
+			Create(Path.GetDirectoryName(importedFilePath), xmlString, ditherLimit, offsetX, offsetZ, sizeX, sizeZ);
 		}
 
-		private WorldPostProcessingStack(string rootPath, string xmlString, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
+		public WorldPostProcessingStack(MCWorldExporter context)
+		{
+			this.context = context;
+		}
+
+		private void Create(string rootPath, string xmlString, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
 		{
 			var xmlRootElement = XDocument.Parse(xmlString).Root;
 			LoadSettings(rootPath, xmlRootElement, ditherLimit, offsetX, offsetZ, sizeX, sizeZ);
@@ -69,47 +76,51 @@ namespace HMConMC.PostProcessors
 			var name = splatXml.Name.LocalName.ToLower();
 			if (name == "splat")
 			{
-				generators.Add(new SplatmappedTerrainPostProcessor(this, splatXml, rootPath, ditherLimit, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new SplatmappedTerrainPostProcessor(context, splatXml, rootPath, ditherLimit, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "water")
 			{
-				generators.Add(new WaterLevelPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new WaterLevelPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "merger")
 			{
-				generators.Add(new WorldMergerPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new WorldMergerPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "ores")
 			{
-				generators.Add(new OreGenPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new OreGenPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "snow")
 			{
-				generators.Add(new SnowPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new SnowPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "deice")
 			{
-				generators.Add(new ThawingPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new ThawingPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "naturalize")
 			{
-				generators.Add(new NaturalTerrainPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new NaturalTerrainPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "vegetation")
 			{
-				generators.Add(new VegetationPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new VegetationPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "torches")
 			{
-				generators.Add(new RandomTorchPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new RandomTorchPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "caves")
 			{
-				generators.Add(new CavesPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new CavesPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
 			else if (name == "bedrock")
 			{
-				generators.Add(new BedrockPostProcessor(rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+				generators.Add(new BedrockPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
+			}
+			else if (name == "analysis")
+			{
+				generators.Add(new BlockDistributionAnalysisPostProcessor(context, splatXml));
 			}
 			else if (name == "include")
 			{
@@ -223,6 +234,14 @@ namespace HMConMC.PostProcessors
 			foreach (var post in generators)
 			{
 				post.OnFinish(exporter.world);
+			}
+		}
+
+		public void OnCreateWorldFiles(string worldFolder)
+		{
+			foreach(var post in generators)
+			{
+				post.OnCreateWorldFiles(worldFolder);
 			}
 		}
 

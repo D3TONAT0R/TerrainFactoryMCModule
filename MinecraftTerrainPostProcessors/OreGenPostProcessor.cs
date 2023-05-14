@@ -1,9 +1,8 @@
 ﻿using MCUtils;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Xml.Linq;
+using Version = MCUtils.Version;
 
 namespace HMConMC.PostProcessors.Splatmapper
 {
@@ -19,28 +18,11 @@ namespace HMConMC.PostProcessors.Splatmapper
 			{
 				foreach(var ore in ores)
 				{
-					if (Chance(random, ore.spawnsPerChunk * multiplier * mask))
-					{
-						ore.Generate(world, random, x, z);
-					}
+					float spawnChanceMul = multiplier * mask;
+					ore.Generate(world, random, spawnChanceMul, x, z);
 				}
 			}
-
-			private bool Chance(Random random, float prob)
-			{
-				return random.NextDouble() <= prob;
-			}
 		}
-
-		public static readonly List<OreGenerator> defaultVanillaOres = new List<OreGenerator>()
-		{
-			new OreGenerator("iron_ore", 9, 8f, 2, 66),
-			new OreGenerator("coal_ore", 32, 10f, 16, 120),
-			new OreGenerator("gold_ore", 8, 1f, 2, 32),
-			new OreGenerator("diamond_ore", 8, 0.25f, 2, 24),
-			new OreGenerator("redstone_ore", 10, 3.2f, 4, 36),
-			new OreGenerator("lapis_ore", 9, 0.6f, 4, 28)
-		};
 
 		public Dictionary<int, Layer> layers = new Dictionary<int, Layer>();
 		public Weightmap<float> weightmap;
@@ -48,22 +30,52 @@ namespace HMConMC.PostProcessors.Splatmapper
 
 		public override PostProcessType PostProcessorType => PostProcessType.Surface;
 
-		public OreGenPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public OreGenPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			random = new Random();
 			rarityMul = float.Parse(xml.Element("multiplier")?.Value ?? "1");
 			var map = xml.Element("map");
-			weightmap = LoadWeightmapAndLayers(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ, layers, CreateLayer);
+			weightmap = LoadWeightmapAndLayers(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ, layers, (xe) => CreateLayer(xe, context.desiredVersion));
 			if (weightmap == null)
 			{
-				Console.WriteLine("Generating ores with default settings.");
-				var defaultLayer = new OreGenLayer();
-				defaultLayer.ores.AddRange(defaultVanillaOres);
-				layers.Add(-1, defaultLayer);
+				Console.WriteLine($"Generating ores with default settings for version {context.desiredVersion}");
+				var gen = new OreGenLayer();
+				gen.ores.AddRange(GetVanillaOreGenerators(context.desiredVersion));
+				layers.Add(-1, gen);
 			}
 		}
 
-		private Layer CreateLayer(XElement elem)
+		public static List<OreGenerator> GetVanillaOreGenerators(Version gameVersion)
+		{
+			var list = new List<OreGenerator>();
+			if(gameVersion >= Version.Release_1(18))
+			{
+				//TODO: make them match 1.18s non-uniform distribution pattern
+				list.Add(new OreGenerator("iron_ore", 9, 7.5f, 2, 64));
+				list.Add(new OreGenerator("coal_ore", 24, 5.5f, 16, 120));
+				list.Add(new OreGenerator("gold_ore", 9, 1f, 2, 30));
+				list.Add(new OreGenerator("diamond_ore", 8, 0.35f, 2, 16));
+				list.Add(new OreGenerator("redstone_ore", 10, 1.2f, 4, 16));
+				list.Add(new OreGenerator("lapis_ore", 9, 0.7f, 4, 28));
+				list.Add(new OreGenerator("copper_ore", 10, 12.5f, 0, 72));
+			}
+			else
+			{
+				list.Add(new OreGenerator("iron_ore", 9, 7.5f, 2, 64));
+				list.Add(new OreGenerator("coal_ore", 24, 5.5f, 16, 120));
+				list.Add(new OreGenerator("gold_ore", 9, 1f, 2, 30));
+				list.Add(new OreGenerator("diamond_ore", 8, 0.35f, 2, 16));
+				list.Add(new OreGenerator("redstone_ore", 10, 1.2f, 4, 16));
+				list.Add(new OreGenerator("lapis_ore", 9, 0.7f, 4, 28));
+				if(gameVersion >= Version.Release_1(17))
+				{
+					list.Add(new OreGenerator("copper_ore", 10, 12.5f, 0, 72));
+				}
+			}
+			return list;
+		}
+
+		private Layer CreateLayer(XElement elem, Version gameVersion)
 		{
 			var layer = new OreGenLayer();
 			foreach (var oreElem in elem.Elements())
@@ -75,7 +87,7 @@ namespace HMConMC.PostProcessors.Splatmapper
 				}
 				else if(elemName == "default")
 				{
-					layer.ores.AddRange(defaultVanillaOres);
+					layer.ores.AddRange(GetVanillaOreGenerators(gameVersion));
 				}
 				else if(elemName == "multiplier")
 				{

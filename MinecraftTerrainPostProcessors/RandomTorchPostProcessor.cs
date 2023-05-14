@@ -12,7 +12,7 @@ namespace HMConMC.PostProcessors {
 
 		public override PostProcessType PostProcessorType => PostProcessType.Surface;
 
-		public RandomTorchPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public RandomTorchPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			chance = float.Parse(xml.Element("amount")?.Value ?? "0.02");
 			random = new Random();

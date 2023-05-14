@@ -20,6 +20,8 @@ namespace HMConMC
 
 		public static readonly string defaultBlock = "minecraft:stone";
 
+		public readonly ExportJob job;
+
 		public MCUtils.Version desiredVersion;
 		public World world;
 		public byte[,] heightmap;
@@ -40,6 +42,7 @@ namespace HMConMC
 
 		public MCWorldExporter(ExportJob job)
 		{
+			this.job = job;
 			regionOffsetX = job.exportNumX + job.settings.GetCustomSetting("mcaOffsetX", 0);
 			regionOffsetZ = job.exportNumZ + job.settings.GetCustomSetting("mcaOffsetZ", 0);
 			generateVoid = job.settings.GetCustomSetting("mcVoidGen", false);
@@ -75,6 +78,7 @@ namespace HMConMC
 
 		public MCWorldExporter(ExportJob job, bool customPostProcessing, bool useDefaultPostProcessing) : this(job)
 		{
+			this.job = job;
 			if (customPostProcessing)
 			{
 				string xmlPath;
@@ -86,14 +90,16 @@ namespace HMConMC
 				}
 				try
 				{
-					postProcessor = WorldPostProcessingStack.CreateFromXML(job.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
+					postProcessor = new WorldPostProcessingStack(this);
+					postProcessor.CreateFromXML(job.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
 				}
 				catch(Exception e)
 				{
 					if(useDefaultPostProcessing)
 					{
 						ConsoleOutput.WriteWarning("Failed to create post processing stack from xml, falling back to default post processing stack. " + e.Message);
-						postProcessor = WorldPostProcessingStack.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
+						postProcessor = new WorldPostProcessingStack(this);
+						postProcessor.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
 					}
 					else
 					{
@@ -103,7 +109,8 @@ namespace HMConMC
 			}
 			else if(useDefaultPostProcessing)
 			{
-				postProcessor = WorldPostProcessingStack.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
+				postProcessor = new WorldPostProcessingStack(this);
+				postProcessor.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
 			}
 		}
 
@@ -155,12 +162,14 @@ namespace HMConMC
 			CreateWorld(name);
 			if (filetype is MCRegionFormat)
 			{
+				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
 				world.WriteRegionFile(stream, regionOffsetX, regionOffsetZ);
 			}
 			else if(filetype is MCWorldFormat)
 			{
 				path = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
 				Directory.CreateDirectory(path);
+				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
 				var mapPath = Path.Combine(path, "overviewmap.png");
 				using (var mapStream = new FileStream(mapPath, FileMode.Create))
 				{

@@ -17,7 +17,7 @@ namespace HMConMC.PostProcessors.Splatmapper
 
 		public override PostProcessType PostProcessorType => PostProcessType.Surface;
 
-		public WaterLevelPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public WaterLevelPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			worldOriginOffsetX = offsetX;
 			worldOriginOffsetZ = offsetZ;

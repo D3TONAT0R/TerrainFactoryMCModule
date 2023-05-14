@@ -31,6 +31,8 @@ namespace HMConMC.PostProcessors
 
 		protected static Random random = new Random();
 
+		public readonly MCWorldExporter context;
+
 		public virtual Priority OrderPriority => Priority.Default;
 
 		public abstract PostProcessType PostProcessorType { get; }
@@ -45,12 +47,13 @@ namespace HMConMC.PostProcessors
 
 		public Weightmap<float> mask = null;
 
-		public AbstractPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ)
+		public AbstractPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ)
 		{
+			this.context = context;
 			worldOriginOffsetX = offsetX;
 			worldOriginOffsetZ = offsetZ;
 			var maskElem = xml.Element("mask");
-			if (maskElem != null)
+			if (maskElem != null && rootPath != null)
 			{
 				string maskPath = Path.Combine(rootPath, maskElem.Value);
 				var channelAttr = maskElem.Attribute("channel");
@@ -173,6 +176,11 @@ namespace HMConMC.PostProcessors
 		public virtual void OnFinish(World world)
 		{
 
+		}
+
+		public virtual void OnCreateWorldFiles(string worldFolder)
+		{
+			
 		}
 	}
 }

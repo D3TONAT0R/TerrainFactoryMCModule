@@ -210,7 +210,7 @@ namespace HMConMC.PostProcessors.Splatmapper
 			xml.TryParseBoolAttribute("plant-check", ref plantCheck);
 			if (schem != null)
 			{
-				generators.Add(new SchematicInstanceGenerator(gen.postProcessor.schematics[schem.Value], amount, plantCheck));
+				generators.Add(new SchematicInstanceGenerator(gen.context.postProcessor.schematics[schem.Value], amount, plantCheck));
 				return true;
 			}
 			else

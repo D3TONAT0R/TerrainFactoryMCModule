@@ -15,14 +15,11 @@ namespace HMConMC.PostProcessors.Splatmapper
 		public Weightmap<byte> map;
 		public List<SurfaceLayer> layers = new List<SurfaceLayer>();
 
-		public WorldPostProcessingStack postProcessor;
-
 		public override PostProcessType PostProcessorType => PostProcessType.Surface;
 
-		public SplatmappedTerrainPostProcessor(WorldPostProcessingStack post, XElement xml, string rootPath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
-			: base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public SplatmappedTerrainPostProcessor(MCWorldExporter context, XElement xml, string rootPath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
+			: base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
-			postProcessor = post;
 			string mapFileName = Path.Combine(rootPath, xml.Attribute("file").Value);
 			foreach (var layer in xml.Elements("layer"))
 			{

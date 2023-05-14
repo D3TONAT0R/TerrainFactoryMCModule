@@ -49,7 +49,7 @@ namespace HMConMC.PostProcessors.Splatmapper
 			{BiomeID.deep_frozen_ocean, 72 },
 		};
 
-		public SnowPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public SnowPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			xml.TryParseBool("top-only", ref topOnly);
 			xml.TryParseBool("check-biomes", ref biomeCheck);

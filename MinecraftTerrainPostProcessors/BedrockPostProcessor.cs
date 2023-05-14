@@ -15,7 +15,7 @@ namespace HMConMC.PostProcessors {
 		public override int BlockProcessYMin => 0;
 		public override int BlockProcessYMax => flatBedrock ? 0 : 3;
 
-		public BedrockPostProcessor(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
+		public BedrockPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			random = new Random();
 		}
