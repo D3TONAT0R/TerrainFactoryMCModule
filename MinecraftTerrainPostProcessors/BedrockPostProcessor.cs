@@ -1,4 +1,5 @@
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Xml.Linq;
 
@@ -6,7 +7,6 @@ namespace HMConMC.PostProcessors {
 	public class BedrockPostProcessor : AbstractPostProcessor {
 
 		public bool flatBedrock = false;
-		Random random;
 
 		public override Priority OrderPriority => Priority.First;
 
@@ -17,12 +17,12 @@ namespace HMConMC.PostProcessors {
 
 		public BedrockPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
-			random = new Random();
+			
 		}
 
-		protected override void OnProcessBlock(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessBlock(World world, BlockCoord pos, int pass, float mask)
 		{
-			if(random.NextDouble() < 1f - y / 4f && !world.IsAir(x,y,z)) world.SetBlock(x, y, z, "minecraft:bedrock");
+			if(random.NextDouble() < 1f - pos.y / 4f && !world.IsAirOrNull(pos)) world.SetBlock(pos, "minecraft:bedrock");
 		}
 	}
 }

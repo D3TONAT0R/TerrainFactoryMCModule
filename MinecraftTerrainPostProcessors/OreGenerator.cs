@@ -1,5 +1,6 @@
 ﻿using HMCon.Util;
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Xml.Linq;
 
@@ -63,7 +64,8 @@ namespace HMConMC.PostProcessors
 						int x1 = x + RandomRange(random, -span, span);
 						int y1 = y + RandomRange(random, -span, span);
 						int z1 = z + RandomRange(random, -span, span);
-						if(world.IsDefaultBlock(x1, y1, z1)) world.SetBlock(x1, y1, z1, block);
+						var pos = new BlockCoord(x1, y1, z1);
+						if(world.IsDefaultBlock(pos)) world.SetBlock(pos, block);
 					}
 				}
 			}

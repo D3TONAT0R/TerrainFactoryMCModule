@@ -1,5 +1,6 @@
 ﻿using HMCon;
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -78,12 +79,12 @@ namespace HMConMC.PostProcessors.Splatmapper
 			return c;
 		}
 
-		protected override void OnProcessSurface (World w, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface (World w, BlockCoord topPos, int pass, float mask)
 		{
-			byte i = map.GetValue(x - worldOriginOffsetX, z - worldOriginOffsetZ);
+			byte i = map.GetValue(topPos.x - worldOriginOffsetX, topPos.z - worldOriginOffsetZ);
 			if (i < 255)
 			{
-				layers[i].RunGenerator(w, x, y, z);
+				layers[i].RunGenerator(w, topPos);
 			}
 		}
 	}

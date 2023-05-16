@@ -2,6 +2,7 @@ using HMCon;
 using HMCon.Util;
 using HMConImage;
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.IO;
 using System.Xml.Linq;
@@ -32,18 +33,19 @@ namespace HMConMC.PostProcessors.Splatmapper
 			ConsoleOutput.WriteLine("Water mapping enabled");
 		}
 
-		protected override void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
 		{
 			int start = waterLevel;
 			if (waterSurfaceMap != null)
 			{
-				start = Math.Max(waterSurfaceMap?[x - worldOriginOffsetX, z - worldOriginOffsetZ] ?? (short)-1, waterLevel);
+				start = Math.Max(waterSurfaceMap?[pos.x - worldOriginOffsetX, pos.z - worldOriginOffsetZ] ?? (short)-1, waterLevel);
 			}
-			for (int y2 = start; y2 > y; y2--)
+			for (int y2 = start; y2 > pos.y; y2--)
 			{
-				if (world.IsAir(x, y2, z))
+				BlockCoord pos2 = (pos.x, y2, pos.z);
+				if (world.IsAirOrNull(pos2))
 				{
-					world.SetBlock(x, y2, z, waterBlock);
+					world.SetBlock(pos2, waterBlock);
 				}
 			}
 		}

@@ -2,6 +2,7 @@
 using HMCon.Util;
 using HMConMC.PostProcessors;
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -26,7 +27,7 @@ namespace HMConMC.PostProcessors
 
 			}
 
-			public abstract void ProcessBlockColumn(World world, int x, int topY, int z, float mask, Random random);
+			public abstract void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random);
 
 			protected bool CarveSphere(World world, Vector3 pos, float radius, bool breakSurface)
 			{
@@ -45,7 +46,7 @@ namespace HMConMC.PostProcessors
 						{
 							if (Vector3.Distance(new Vector3(x, y, z), pos) < radius)
 							{
-								hasCarved |= CarveBlock(world, x, y, z, breakSurface);
+								hasCarved |= CarveBlock(world, (x,y,z), breakSurface);
 							}
 						}
 					}
@@ -53,9 +54,9 @@ namespace HMConMC.PostProcessors
 				return hasCarved;
 			}
 
-			protected bool CarveBlock(World world, int x, int y, int z, bool allowSurfaceBreak)
+			protected bool CarveBlock(World world, BlockCoord pos, bool allowSurfaceBreak)
 			{
-				var b = world.GetBlock(x, y, z);
+				var b = world.GetBlock(pos);
 
 				if (b == null || Blocks.IsAir(b)) return false;
 
@@ -67,13 +68,13 @@ namespace HMConMC.PostProcessors
 
 				if (b != null && !b.CompareMultiple("minecraft:bedrock") && !Blocks.IsLiquid(b))
 				{
-					if (y <= lavaHeight)
+					if (pos.y <= lavaHeight)
 					{
-						world.SetBlock(x, y, z, lava);
+						world.SetBlock(pos, lava);
 					}
 					else
 					{
-						world.SetBlock(x, y, z, BlockState.Air);
+						world.SetBlock(pos, BlockState.Air);
 					}
 					return true;
 				}
@@ -128,9 +129,9 @@ namespace HMConMC.PostProcessors
 				}
 			}
 
-			public override void ProcessBlockColumn(World world, int x, int topY, int z, float mask, Random random)
+			public override void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random)
 			{
-				if (Chance(amount * 0.15f * invChunkArea * (topY * 0.016f) * mask))
+				if (Chance(amount * 0.15f * invChunkArea * (topPos.y * 0.016f) * mask))
 				{
 					var r = random.NextDouble();
 					if (distibution == Distibution.FavorBottom)
@@ -142,8 +143,8 @@ namespace HMConMC.PostProcessors
 						r = Math.Sqrt(r);
 					}
 					int y = (int)MathUtils.Lerp(yMin, yMax, (float)r);
-					if (y > topY) return;
-					GenerateCave(world, new Vector3(x, y, z), 0);
+					if (y > topPos.y) return;
+					GenerateCave(world, new Vector3(topPos.x, y, topPos.z), 0);
 				}
 			}
 
@@ -247,11 +248,11 @@ namespace HMConMC.PostProcessors
 				perlinGen.fractalPersistence = 0.15f * noiseScale;
 			}
 
-			public override void ProcessBlockColumn(World world, int x, int topY, int z, float mask, Random random)
+			public override void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random)
 			{
-				for (int y = yMin; y <= Math.Min(yMax, topY); y++)
+				for (int y = yMin; y <= Math.Min(yMax, topPos.y); y++)
 				{
-					float perlin = perlinGen.GetPerlinAtCoord(x, y, z);
+					float perlin = perlinGen.GetPerlinAtCoord(topPos.x, y, topPos.z);
 					perlin = 2f * (perlin - 0.5f) + 0.5f;
 
 					double hw;
@@ -266,7 +267,7 @@ namespace HMConMC.PostProcessors
 
 					if (perlin * hw * mask > threshold)
 					{
-						CarveBlock(world, x, y, z, true);
+						CarveBlock(world, (topPos.x, y, topPos.z), true);
 					}
 				}
 			}
@@ -294,37 +295,37 @@ namespace HMConMC.PostProcessors
 				}
 			}
 
-			public override void ProcessBlockColumn(World world, int x, int topY, int z, float mask, Random random)
+			public override void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random)
 			{
 				if (Chance(amount * 0.08f * mask))
 				{
 					int y = random.Next(yMin, yMax);
-					if (y > topY) return;
-					TryGenerateSpring(world, x, y, z, isLavaSpring ? lavaBlock : waterBlock);
+					if (y > topPos.y) return;
+					TryGenerateSpring(world, topPos, isLavaSpring ? lavaBlock : waterBlock);
 				}
 			}
 
-			private void TryGenerateSpring(World world, int x, int y, int z, BlockState block)
+			private void TryGenerateSpring(World world, BlockCoord pos, BlockState block)
 			{
-				if(CanGenerateSpring(world, x, y, z))
+				if(CanGenerateSpring(world, pos))
 				{
-					world.SetBlock(x, y, z, block);
-					world.MarkForTickUpdate(x, y, z);
+					world.SetBlock(pos, block);
+					world.MarkForTickUpdate(pos);
 				}
 			}
 
-			private bool CanGenerateSpring(World world, int x, int y, int z)
+			private bool CanGenerateSpring(World world, BlockCoord pos)
 			{
-				if (!world.IsDefaultBlock(x, y, z)) return false;
+				if (!world.IsDefaultBlock(pos)) return false;
 				int openSides = 0;
-				if (world.IsAirNotNull(x - 1, y, z)) openSides++;
-				if (world.IsAirNotNull(x + 1, y, z)) openSides++;
-				if (world.IsAirNotNull(x, y, z - 1)) openSides++;
-				if (world.IsAirNotNull(x, y, z + 1)) openSides++;
+				if (world.IsAirNotNull(pos.Left)) openSides++;
+				if (world.IsAirNotNull(pos.Right)) openSides++;
+				if (world.IsAirNotNull(pos.Back)) openSides++;
+				if (world.IsAirNotNull(pos.Forward)) openSides++;
 				if(openSides >= 1 && openSides <= 2)
 				{
 					//Check for top and bottom
-					if (!world.IsAir(x, y + 1, z) && !world.IsAir(x, y - 1, z))
+					if (!world.IsAirOrNull(pos.Above) && !world.IsAirOrNull(pos.Below))
 					{
 						return true;
 					}
@@ -338,11 +339,11 @@ namespace HMConMC.PostProcessors
 
 			public List<Carver> carvers = new List<Carver>();
 
-			public override void ProcessBlockColumn(World world, Random random, int x, int topY, int z, float mask)
+			public override void ProcessBlockColumn(World world, Random random, BlockCoord pos, float mask)
 			{
 				foreach (var c in carvers)
 				{
-					c.ProcessBlockColumn(world, x, topY, z, mask, random);
+					c.ProcessBlockColumn(world, pos, mask, random);
 				}
 			}
 		}
@@ -404,9 +405,9 @@ namespace HMConMC.PostProcessors
 			return layer;
 		}
 
-		protected override void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
 		{
-			ProcessSplatmapLayersSurface(caveGenLayers, weightmap, world, x, y, z, pass, mask);
+			ProcessSplatmapLayersSurface(caveGenLayers, weightmap, world, pos, pass, mask);
 		}
 	}
 }

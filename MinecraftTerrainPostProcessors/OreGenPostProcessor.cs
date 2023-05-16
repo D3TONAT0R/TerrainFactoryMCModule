@@ -1,4 +1,5 @@
 ﻿using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -14,12 +15,12 @@ namespace HMConMC.PostProcessors.Splatmapper
 			public List<OreGenerator> ores = new List<OreGenerator>();
 			public float multiplier = 1;
 
-			public override void ProcessBlockColumn(World world, Random random, int x, int topY, int z, float mask)
+			public override void ProcessBlockColumn(World world, Random random, BlockCoord topPos, float mask)
 			{
 				foreach(var ore in ores)
 				{
 					float spawnChanceMul = multiplier * mask;
-					ore.Generate(world, random, spawnChanceMul, x, z);
+					ore.Generate(world, random, spawnChanceMul, topPos.x, topPos.z);
 				}
 			}
 		}
@@ -101,10 +102,10 @@ namespace HMConMC.PostProcessors.Splatmapper
 			return layer;
 		}
 
-		protected override void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface(World world, BlockCoord topPos, int pass, float mask)
 		{
-			if (y < 4) return;
-			ProcessSplatmapLayersSurface(layers, weightmap, world, x, y, z, pass, mask);
+			//if (topPos.y < 4) return;
+			ProcessSplatmapLayersSurface(layers, weightmap, world, topPos, pass, mask);
 		}
 	}
 }

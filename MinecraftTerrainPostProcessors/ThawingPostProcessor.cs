@@ -1,5 +1,6 @@
 ﻿using HMCon;
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,37 +41,37 @@ namespace HMConMC.PostProcessors
 
 		}
 
-		protected override void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
 		{
 			//Replace snowy biomes with normal biomes
-			var biome = world.GetBiome(x, z);
+			var biome = world.GetBiome(pos.x, pos.z);
 			if (biome.HasValue)
 			{
 				if (biomeDeIcingTable.ContainsKey(biome.Value))
 				{
-					world.SetBiome(x, z, biomeDeIcingTable[biome.Value]);
+					world.SetBiome(pos.x, pos.z, biomeDeIcingTable[biome.Value]);
 				}
 			}
 			else
 			{
-				ConsoleOutput.WriteError($"Biome at [{x},{z}] was null");
+				ConsoleOutput.WriteError($"Biome at [{pos.x},{pos.z}] was null");
 			}
 		}
 
-		protected override void OnProcessBlock(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessBlock(World world, BlockCoord pos, int pass, float mask)
 		{
-			if (world.IsAir(x, y, z)) return;
+			if (world.IsAirOrNull(pos)) return;
 			//Replace snowy blocks with air or water
-			BlockState block = world.GetBlockState(x, y, z);
+			BlockState block = world.GetBlockState(pos);
 			if (block == null) return;
 			if (block.properties.Contains("snowy"))
 			{
 				//Replace block with itself to get rid of the "snowy" property
-				world.SetBlock(x, y, z, block.block.ID);
+				world.SetBlock(pos, block.block.ID);
 			}
 			else if (blockReplacementTable.ContainsKey(block.block.ID))
 			{
-				world.SetBlock(x, y, z, blockReplacementTable[block.block.ID]);
+				world.SetBlock(pos, blockReplacementTable[block.block.ID]);
 			}
 		}
 	}

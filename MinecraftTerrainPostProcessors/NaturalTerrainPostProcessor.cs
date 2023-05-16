@@ -1,4 +1,5 @@
 using MCUtils;
+using MCUtils.Coordinates;
 using System.Xml.Linq;
 
 namespace HMConMC.PostProcessors {
@@ -14,25 +15,25 @@ namespace HMConMC.PostProcessors {
 			waterLevel = int.Parse(xml.Element("waterlevel")?.Value ?? "-1");
 		}
 
-		protected override void OnProcessBlock(MCUtils.World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessBlock(MCUtils.World world, BlockCoord pos, int pass, float mask)
 		{
 			//Fill the terrain with water up to the waterLevel
-			if(y <= waterLevel) {
-				if(world.IsAir(x, y, z)) world.SetBlock(x, y, z, "minecraft:water");
+			if(pos.y <= waterLevel) {
+				if(world.IsAirOrNull(pos)) world.SetBlock(pos, "minecraft:water");
 			}
 		}
 
-		protected override void OnProcessSurface(MCUtils.World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface(MCUtils.World world, BlockCoord pos, int pass, float mask)
 		{
 			//Place grass on top & 3 layers of dirt below
-			if(y > waterLevel + 1) {
-				world.SetBlock(x, y, z, "minecraft:grass_block");
+			if(pos.y > waterLevel + 1) {
+				world.SetBlock(pos, "minecraft:grass_block");
 				for(int i = 1; i < 4; i++) {
-					world.SetBlock(x, y - i, z, "minecraft:dirt");
+					world.SetBlock((pos.x, pos.y - i, pos.z), "minecraft:dirt");
 				}
 			} else {
 				for(int i = 0; i < 4; i++) {
-					world.SetBlock(x, y - i, z, "minecraft:gravel");
+					world.SetBlock((pos.x, pos.y - i, pos.z), "minecraft:gravel");
 				}
 			}
 		}

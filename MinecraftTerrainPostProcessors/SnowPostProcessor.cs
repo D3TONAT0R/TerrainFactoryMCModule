@@ -2,6 +2,7 @@ using HMCon;
 using HMCon.Util;
 using HMConImage;
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,23 +66,19 @@ namespace HMConMC.PostProcessors.Splatmapper
 			snowyMycelium.properties.Add("snowy", true);
 		}
 
-		protected override void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
+		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
 		{
-			if(x == 1432 && z == 1352)
-			{
-				Console.WriteLine("x");
-			}
-			var biome = world.GetBiome(x, y, z);
+			var biome = world.GetBiome(pos);
 			if (biome.HasValue)
 			{
 				if (!topOnly)
 				{
-					FreezeBlock(world, x, y, z, mask, biome.Value);
+					FreezeBlock(world, pos, mask, biome.Value);
 				}
-				int y2 = world.GetHighestBlock(x, z, HeightmapType.SolidBlocks);
-				if (topOnly || y2 > y)
+				int y2 = world.GetHighestBlock(pos.x, pos.z, HeightmapType.SolidBlocks);
+				if (topOnly || y2 > pos.y)
 				{
-					FreezeBlock(world, x, y2, z, mask, biome.Value);
+					FreezeBlock(world, (pos.x, y2, pos.z), mask, biome.Value);
 				}
 			}
 		}
@@ -99,18 +96,18 @@ namespace HMConMC.PostProcessors.Splatmapper
 			}
 		}
 
-		private void FreezeBlock(World world, int x, int y, int z, float mask, BiomeID? biome, bool airCheck = true)
+		private void FreezeBlock(World world, BlockCoord pos, float mask, BiomeID? biome, bool airCheck = true)
 		{
-			if (biome.HasValue && !IsAboveBiomeThreshold(biome.Value, y)) return;
-			bool canFreeze = !airCheck || world.IsAir(x, y + 1, z);
+			if (biome.HasValue && !IsAboveBiomeThreshold(biome.Value, pos.y)) return;
+			bool canFreeze = !airCheck || world.IsAirOrNull(pos.Above);
 			if (!canFreeze) return;
-			var block = world.GetBlock(x, y, z);
+			var block = world.GetBlock(pos);
 			if (block.IsWater)
 			{
 				//100% ice coverage above mask values of 0.25f
 				if (mask >= 1 || random.NextDouble() <= mask * 4f)
 				{
-					world.SetBlock(x, y, z, iceBlock);
+					world.SetBlock(pos, iceBlock);
 				}
 			}
 			else
@@ -118,19 +115,19 @@ namespace HMConMC.PostProcessors.Splatmapper
 				//if (mask >= 1 || random.NextDouble() <= mask)
 				//{
 					if (block.IsLiquid || block.CompareMultiple("minecraft:snow", "minecraft:ice")) return;
-					world.SetBlock(x, y + 1, z, snowLayerBlock);
+					world.SetBlock(pos.Above, snowLayerBlock);
 					//Add "snowy" tag on blocks that support it.
 					if (block.Compare(snowyGrass.block.ID))
 					{
-						world.SetBlock(x, y, z, snowyGrass);
+						world.SetBlock(pos, snowyGrass);
 					}
 					else if (block.Compare(snowyPodzol.block.ID))
 					{
-						world.SetBlock(x, y, z, snowyPodzol);
+						world.SetBlock(pos, snowyPodzol);
 					}
 					else if (block.Compare(snowyMycelium.block.ID))
 					{
-						world.SetBlock(x, y, z, snowyMycelium);
+						world.SetBlock(pos, snowyMycelium);
 					}
 				//}
 			}

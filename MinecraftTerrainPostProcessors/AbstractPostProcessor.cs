@@ -1,4 +1,5 @@
 using MCUtils;
+using MCUtils.Coordinates;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -124,46 +125,46 @@ namespace HMConMC.PostProcessors
 			layers.Add(maskChannelIndex, createLayerAction(elem));
 		}
 
-		public void ProcessBlock(World world, int x, int y, int z, int pass)
+		public void ProcessBlock(World world, BlockCoord pos, int pass)
 		{
-			float maskValue = mask != null ? mask.GetValue(x - worldOriginOffsetX, z - worldOriginOffsetZ) : 1;
+			float maskValue = mask != null ? mask.GetValue(pos.x - worldOriginOffsetX, pos.z - worldOriginOffsetZ) : 1;
 			if (maskValue > 0)
 			{
-				OnProcessBlock(world, x, y, z, pass, maskValue);
+				OnProcessBlock(world, pos, pass, maskValue);
 			}
 		}
 
-		public void ProcessSurface(World world, int x, int y, int z, int pass)
+		public void ProcessSurface(World world, BlockCoord pos, int pass)
 		{
-			float maskValue = mask != null ? mask.GetValue(x - worldOriginOffsetX, z - worldOriginOffsetZ) : 1;
+			float maskValue = mask != null ? mask.GetValue(pos.x - worldOriginOffsetX, pos.z - worldOriginOffsetZ) : 1;
 			if (maskValue > 0)
 			{
-				OnProcessSurface(world, x, y, z, pass, maskValue);
+				OnProcessSurface(world, pos, pass, maskValue);
 			}
 		}
 
-		protected void ProcessSplatmapLayersSurface(Dictionary<int, Layer> layers, Weightmap<float> weightmap, World world, int x, int y, int z, int pass, float mask)
+		protected void ProcessSplatmapLayersSurface(Dictionary<int, Layer> layers, Weightmap<float> weightmap, World world, BlockCoord pos, int pass, float mask)
 		{
 			foreach (var l in layers)
 			{
 				float layerMask = mask;
 				if (l.Key > -1)
 				{
-					layerMask *= weightmap.GetValue(x, z, l.Key);
+					layerMask *= weightmap.GetValue(pos.x, pos.z, l.Key);
 				}
 				if (layerMask > 0.001f)
 				{
-					l.Value.ProcessBlockColumn(world, random, x, y, z, layerMask);
+					l.Value.ProcessBlockColumn(world, random, pos, layerMask);
 				}
 			}
 		}
 
-		protected virtual void OnProcessBlock(World world, int x, int y, int z, int pass, float mask)
+		protected virtual void OnProcessBlock(World world, BlockCoord pos, int pass, float mask)
 		{
 
 		}
 
-		protected virtual void OnProcessSurface(World world, int x, int y, int z, int pass, float mask)
+		protected virtual void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
 		{
 
 		}

@@ -47,7 +47,7 @@ namespace HMConMC.PostProcessors
 			{
 				for (int i = 0; i < h; i++)
 				{
-					world.SetBlock(x, y + i, z, trunkBlock);
+					world.SetBlock((x, y + i, z), trunkBlock);
 				}
 			}
 			int xm = x - (int)Math.Floor((float)StructureSizeX / 2);
@@ -63,7 +63,7 @@ namespace HMConMC.PostProcessors
 						var (block, prob) = blocks[d];
 						if (r.NextDouble() < prob)
 						{
-							world.SetBlock(xm + x1, y + h + y1, zm + z1, block);
+							world.SetBlock((xm + x1, y + h + y1, zm + z1), block);
 						}
 					}
 				}
@@ -89,7 +89,7 @@ namespace HMConMC.PostProcessors
 					for (int x = x1; x < x2; x++)
 					{
 						if (schematic[sx, sy, sz] == 0) continue; //Do not check this block if the result is nothing anyway
-						if (!world.IsAir(x, y, z) || world.TryGetRegion(x, z) == null) return true;
+						if (!world.IsAirOrNull((x, y, z)) || world.GetRegion(x, z) == null) return true;
 						sx++;
 					}
 					sz++;

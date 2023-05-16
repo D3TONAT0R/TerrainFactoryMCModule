@@ -138,7 +138,7 @@ namespace HMConMC
 						{
 							for (int y = 0; y <= heightmap[x, z]; y++)
 							{
-								world.SetDefaultBlock(regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z, true);
+								world.SetDefaultBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), true);
 							}
 						}
 					}

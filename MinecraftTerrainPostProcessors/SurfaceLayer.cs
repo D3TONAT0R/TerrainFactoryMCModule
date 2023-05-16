@@ -2,6 +2,7 @@
 using HMCon.Util;
 using HMConMC.PostProcessors.Splatmapper;
 using MCUtils;
+using MCUtils.Coordinates;
 using NoiseGenerator;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,13 @@ namespace HMConMC.PostProcessors.Splatmapper
 		public int yMin = int.MinValue;
 		public int yMax = int.MaxValue;
 
-		public abstract bool Generate(World w, int x, int y, int z);
+		public abstract bool Generate(World w, BlockCoord pos);
 
-		protected bool SetBlock(World w, int x, int y, int z, string b)
+		protected bool SetBlock(World w, BlockCoord pos, string b)
 		{
-			if (!string.IsNullOrWhiteSpace(b) && !w.IsAir(x, y, z))
+			if (!string.IsNullOrWhiteSpace(b) && !w.IsAirOrNull(pos))
 			{
-				return w.SetBlock(x, y, z, b);
+				return w.SetBlock(pos, b);
 			}
 			else
 			{
@@ -46,16 +47,16 @@ namespace HMConMC.PostProcessors.Splatmapper
 
 		}
 
-		public override bool Generate(World w, int x, int y, int z)
+		public override bool Generate(World w, BlockCoord pos)
 		{
-			if (y < yMin || y > yMax)
+			if (pos.y < yMin || pos.y > yMax)
 			{
 				return false;
 			}
 			bool b = false;
 			for (int i = 0; i < blocks.Count; i++)
 			{
-				b |= SetBlock(w, x, y - i, z, blocks[i]);
+				b |= SetBlock(w, (pos.x, pos.y - i, pos.z), blocks[i]);
 			}
 			return b;
 		}
@@ -74,11 +75,11 @@ namespace HMConMC.PostProcessors.Splatmapper
 			perlinThreshold = threshold;
 		}
 
-		public override bool Generate(World w, int x, int y, int z)
+		public override bool Generate(World w, BlockCoord pos)
 		{
-			if (perlinGen.GetPerlinAtCoord(x, z) < perlinThreshold)
+			if (perlinGen.GetPerlinAtCoord(pos.x, pos.z) < perlinThreshold)
 			{
-				return base.Generate(w, x, y, z);
+				return base.Generate(w, pos);
 			}
 			else
 			{
@@ -111,20 +112,20 @@ namespace HMConMC.PostProcessors.Splatmapper
 			isPlant = doPlantCheck;
 		}
 
-		public override bool Generate(World world, int x, int y, int z)
+		public override bool Generate(World world, BlockCoord pos)
 		{
-			if (isPlant && (!Blocks.IsPlantSustaining(world.GetBlock(x, y, z)) || !world.IsAir(x, y + 1, z))) return false;
-			if (y < yMin || y > yMax) return false;
+			if (isPlant && (!Blocks.IsPlantSustaining(world.GetBlock(pos)) || !world.IsAirOrNull(pos.Above))) return false;
+			if (pos.y < yMin || pos.y > yMax) return false;
 
 			if (random.NextDouble() < chance / 128f)
 			{
 				if (schematic != null)
 				{
-					return schematic.Build(world, x, y + 1, z, random);
+					return schematic.Build(world, pos.x, pos.y + 1, pos.z, random);
 				}
 				else
 				{
-					return world.SetBlock(x, y + 1, z, block);
+					return world.SetBlock(pos.Above, block);
 				}
 			}
 			else
@@ -143,10 +144,10 @@ namespace HMConMC.PostProcessors.Splatmapper
 			biomeID = biome;
 		}
 
-		public override bool Generate(World w, int x, int y, int z)
+		public override bool Generate(World w, BlockCoord pos)
 		{
-			if (y < yMin || y > yMax) return false;
-			w.SetBiome(x, z, biomeID);
+			if (pos.y < yMin || pos.y > yMax) return false;
+			w.SetBiome(pos.x, pos.z, biomeID);
 			return true;
 		}
 	}
@@ -250,11 +251,11 @@ namespace HMConMC.PostProcessors.Splatmapper
 			}
 		}
 
-		public void RunGenerator(World w, int x, int y, int z)
+		public void RunGenerator(World w, BlockCoord pos)
 		{
 			for (int i = 0; i < generators.Count; i++)
 			{
-				generators[i].Generate(w, x, y, z);
+				generators[i].Generate(w, pos);
 			}
 		}
 	}

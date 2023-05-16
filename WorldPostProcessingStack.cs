@@ -203,7 +203,7 @@ namespace HMConMC.PostProcessors
 							{
 								for (int y = post.BlockProcessYMin; y <= post.BlockProcessYMax; y++)
 								{
-									post.ProcessBlock(exporter.world, x + exporter.regionOffsetX * 512, y, z + exporter.regionOffsetZ * 512, pass);
+									post.ProcessBlock(exporter.world, (x + exporter.regionOffsetX * 512, y, z + exporter.regionOffsetZ * 512), pass);
 								}
 							}
 							UpdateProgressBar(processorIndex, "Decorating terrain", name, (x + 1) / (float)exporter.heightmapLengthX, pass, post.NumberOfPasses);
@@ -217,7 +217,7 @@ namespace HMConMC.PostProcessors
 						{
 							for (int z = 0; z < exporter.heightmapLengthZ; z++)
 							{
-								post.ProcessSurface(exporter.world, x + exporter.regionOffsetX * 512, exporter.heightmap[x, z], z + exporter.regionOffsetZ * 512, pass);
+								post.ProcessSurface(exporter.world, (x + exporter.regionOffsetX * 512, exporter.heightmap[x, z], z + exporter.regionOffsetZ * 512), pass);
 							}
 							UpdateProgressBar(processorIndex, "Decorating surface", name, (x + 1) / (float)exporter.heightmapLengthX, pass, post.NumberOfPasses);
 						}
@@ -252,10 +252,11 @@ namespace HMConMC.PostProcessors
 			ConsoleOutput.UpdateProgressBar($"{index + 1}/{generators.Count} {title} [{name}{passInfo}]", progressWithPasses);
 		}
 
+		/*
 		public void ProcessSurface(World world, int x, int y, int z, int pass, float mask)
 		{
 			var gen = generators[pass];
-			gen.ProcessSurface(world, x, y, z, 0);
+			gen.ProcessSurface(world, (x, y, z), 0);
 		}
 
 		public void ProcessRegion(World world, MCUtils.Region reg, int rx, int rz, int pass)
@@ -263,5 +264,6 @@ namespace HMConMC.PostProcessors
 			var gen = generators[pass];
 			gen.ProcessRegion(world, reg, rx, rz, 0);
 		}
+		*/
 	}
 }
