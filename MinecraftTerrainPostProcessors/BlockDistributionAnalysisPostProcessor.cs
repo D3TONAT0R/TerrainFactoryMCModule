@@ -2,6 +2,8 @@
 using HMCon.Export;
 using HMCon.Util;
 using MCUtils;
+using MCUtils.Utilities.BlockDistributionAnalysis;
+using System;
 using System.Xml.Linq;
 
 namespace HMConMC.PostProcessors
@@ -10,19 +12,21 @@ namespace HMConMC.PostProcessors
 	{
 		public override PostProcessType PostProcessorType => PostProcessType.RegionOnly;
 
-		public BlockDistributionAnalysis analysis;
+		public Analyzer analysis;
+		public AnalysisEvaluator.TargetBlockTypes targetFlags;
+
+		short yMin = -64;
+		short yMax = 320;
 
 		public BlockDistributionAnalysisPostProcessor(MCWorldExporter context, XElement xml) : base(context, null, xml, 0, 0, 0, 0)
 		{
 			//TODO: Add options to only process a specific area of chunks
-			int yMin = -64;
-			int yMax = 320;
-			xml.TryParseInt("y-min", ref yMin);
-			xml.TryParseInt("y-max", ref yMax);
-			int targetFlagsInt = (int)(BlockDistributionAnalysis.TargetBlockTypes.Ores | BlockDistributionAnalysis.TargetBlockTypes.AirAndLiquids);
+			xml.TryParseShort("y-min", ref yMin);
+			xml.TryParseShort("y-max", ref yMax);
+			int targetFlagsInt = (int)(AnalysisEvaluator.TargetBlockTypes.Ores | AnalysisEvaluator.TargetBlockTypes.AirAndLiquids);
 			xml.TryParseInt("types", ref targetFlagsInt);
-			BlockDistributionAnalysis.TargetBlockTypes targetFlags = (BlockDistributionAnalysis.TargetBlockTypes)targetFlagsInt;
-			analysis = new BlockDistributionAnalysis(targetFlags, (short)yMin, (short)yMax);
+			targetFlags = (AnalysisEvaluator.TargetBlockTypes)targetFlagsInt;
+			analysis = new Analyzer((short)yMin, (short)yMax);
 		}
 
 		public override void ProcessRegion(World world, Region reg, int rx, int rz, int pass)
@@ -32,8 +36,11 @@ namespace HMConMC.PostProcessors
 
 		public override void OnCreateWorldFiles(string worldFolder)
 		{
+			analysis.analysisData.SaveToWorldFolder(worldFolder);
 			//Write results to file
-			analysis.SaveAsCSVInWorldFolder(worldFolder);
+			var ev = new AnalysisEvaluation(analysis.analysisData, yMin, yMax, false);
+			ev.SaveAsCSVInWorldFolder(worldFolder);
+			Console.WriteLine("Analysis results written to world folder.");
 		}
 	}
 }

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace HMConMC
 {
@@ -25,6 +26,8 @@ namespace HMConMC
 		public MCUtils.Version desiredVersion;
 		public World world;
 		public byte[,] heightmap;
+
+		public bool generateOverviewMap = false;
 
 		public int regionNumX;
 		public int regionNumZ;
@@ -48,7 +51,7 @@ namespace HMConMC
 			generateVoid = job.settings.GetCustomSetting("mcVoidGen", false);
 			if(job.settings.HasCustomSetting<string>("mcVersion"))
 			{
-				desiredVersion = MCUtils.Version.Parse(job.settings.GetCustomSetting("mcVersion", "")); 
+				desiredVersion = MCUtils.Version.Parse(job.settings.GetCustomSetting("mcVersion", ""));
 			}
 			else
 			{
@@ -61,16 +64,16 @@ namespace HMConMC
 			heightmapLengthZ = hmapFlipped.GetLength(1);
 			worldBounds = new Bounds(xmin, zmin, xmin + heightmapLengthX - 1, zmin + heightmapLengthZ - 1);
 			heightmap = new byte[heightmapLengthX, heightmapLengthZ];
-			for (int x = 0; x < heightmapLengthX; x++)
+			for(int x = 0; x < heightmapLengthX; x++)
 			{
-				for (int z = 0; z < heightmapLengthZ; z++)
+				for(int z = 0; z < heightmapLengthZ; z++)
 				{
 					heightmap[x, z] = (byte)MathUtils.Clamp((float)Math.Round(hmapFlipped[x, z], MidpointRounding.AwayFromZero), 0, 255);
 				}
 			}
 			regionNumX = (int)Math.Ceiling(heightmapLengthX / 512f);
 			regionNumZ = (int)Math.Ceiling(heightmapLengthZ / 512f);
-			if (heightmapLengthX % 16 > 0 || heightmapLengthZ % 16 > 0)
+			if(heightmapLengthX % 16 > 0 || heightmapLengthZ % 16 > 0)
 			{
 				ConsoleOutput.WriteWarning("Input heightmap is not a multiple of 16. Void borders will be present in the world.");
 			}
@@ -79,13 +82,16 @@ namespace HMConMC
 		public MCWorldExporter(ExportJob job, bool customPostProcessing, bool useDefaultPostProcessing) : this(job)
 		{
 			this.job = job;
-			if (customPostProcessing)
+			if(customPostProcessing)
 			{
 				string xmlPath;
-				if (job.settings.HasCustomSetting<string>("mcpostfile")) {
+				if(job.settings.HasCustomSetting<string>("mcpostfile"))
+				{
 					xmlPath = Path.Combine(Path.GetDirectoryName(job.data.filename), job.settings.GetCustomSetting("mcpostfile", ""));
-					if (Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
-				} else {
+					if(Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
+				}
+				else
+				{
 					xmlPath = Path.ChangeExtension(job.FilePath, null) + "-postprocess.xml";
 				}
 				try
@@ -112,6 +118,13 @@ namespace HMConMC
 				postProcessor = new WorldPostProcessingStack(this);
 				postProcessor.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
 			}
+			if(job.settings.GetCustomSetting("mcAnalyzeBlocks", false))
+			{
+				if(!postProcessor.ContinsGeneratorOfType(typeof(BlockDistributionAnalysisPostProcessor)))
+				{
+					postProcessor.generators.Add(new BlockDistributionAnalysisPostProcessor(this, XElement.Parse("<null />")));
+				}
+			}
 		}
 
 		private void CreateWorld(string worldName)
@@ -130,21 +143,34 @@ namespace HMConMC
 		{
 			int progress = 0;
 			int iterations = (int)Math.Ceiling(heightmapLengthX / 16f);
-			Parallel.For(0, iterations, (int cx) => {
-				for (int bx = 0; bx < Math.Min(16, heightmapLengthX - cx * 16); bx++)
+			BlockState bedrock = new BlockState("bedrock");
+			BlockState deepslate = new BlockState("deepslate");
+			Parallel.For(0, iterations, (int cx) =>
+			{
+				for(int bx = 0; bx < Math.Min(16, heightmapLengthX - cx * 16); bx++)
+				{
+					int x = cx * 16 + bx;
+					for(int z = 0; z < heightmapLengthZ; z++)
 					{
-						int x = cx * 16 + bx;
-						for (int z = 0; z < heightmapLengthZ; z++)
+						int lowest = 0;
+						if(desiredVersion >= MCUtils.Version.Release_1(18))
 						{
-							for (int y = 0; y <= heightmap[x, z]; y++)
+							lowest = -64;
+							for(int y = -64; y <= heightmap[x, z]; y++)
 							{
-								world.SetDefaultBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), true);
+								world.SetBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), deepslate, true);
 							}
 						}
+						for(int y = 0; y <= heightmap[x, z]; y++)
+						{
+							world.SetDefaultBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), true);
+						}
+						world.SetBlock((x, lowest, z), bedrock);
 					}
-					progress++;
-					ConsoleOutput.UpdateProgressBar("Generating base terrain", progress / (float)iterations);
 				}
+				progress++;
+				ConsoleOutput.UpdateProgressBar("Generating base terrain", progress / (float)iterations);
+			}
 			);
 		}
 
@@ -160,7 +186,7 @@ namespace HMConMC
 		{
 			string name = Path.GetFileNameWithoutExtension(path);
 			CreateWorld(name);
-			if (filetype is MCRegionFormat)
+			if(filetype is MCRegionFormat)
 			{
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
 				world.WriteRegionFile(stream, regionOffsetX, regionOffsetZ);
@@ -170,11 +196,14 @@ namespace HMConMC
 				path = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
 				Directory.CreateDirectory(path);
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
-				var mapPath = Path.Combine(path, "overviewmap.png");
-				using (var mapStream = new FileStream(mapPath, FileMode.Create))
+				if(generateOverviewMap)
 				{
-					var mapExporter = new OverviewmapExporter(this, true);
-					mapExporter.WriteFile(mapStream, mapPath);
+					var mapPath = Path.Combine(path, "overviewmap.png");
+					using(var mapStream = new FileStream(mapPath, FileMode.Create))
+					{
+						var mapExporter = new OverviewmapExporter(this, true);
+						mapExporter.WriteFile(mapStream, mapPath);
+					}
 				}
 				world.WriteWorldSave(path);
 			}
@@ -187,7 +216,7 @@ namespace HMConMC
 		public short[,] GetHeightmap(HeightmapType type, bool keepFlippedZ)
 		{
 			var hm = world.GetHeightmap(worldBounds.xMin, worldBounds.yMin, worldBounds.xMax, worldBounds.yMax, type);
-			if (!keepFlippedZ)
+			if(!keepFlippedZ)
 			{
 				hm = ArrayConverter.Flip(hm);
 			}
