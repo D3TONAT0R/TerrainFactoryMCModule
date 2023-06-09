@@ -23,25 +23,25 @@ namespace HMConMC
 			return MinecraftRegionImporter.ImportHeightmap(importPath, MCUtils.HeightmapType.TerrainBlocksNoLiquid);
 		}
 
-		protected override bool ExportFile(string path, ExportJob job)
+		protected override bool ExportFile(string path, ExportTask task)
 		{
 			using (var stream = BeginWriteStream(path))
 			{
-				new MCWorldExporter(job, true, true).WriteFile(path, stream, this);
+				new MCWorldExporter(task, true, true).WriteFile(path, stream, this);
 			}
 			return true;
 		}
 
-		public override void ModifyFileName(ExportJob job, FileNameBuilder nameBuilder)
+		public override void ModifyFileName(ExportTask task, FileNameBuilder nameBuilder)
 		{
-			nameBuilder.gridNum = (job.exportNumX + job.settings.GetCustomSetting("mcaOffsetX", 0), job.exportNumZ + job.settings.GetCustomSetting("mcaOffsetZ", 0));
+			nameBuilder.tileIndex = (task.exportNumX + task.settings.GetCustomSetting("mcaOffsetX", 0), task.exportNumZ + task.settings.GetCustomSetting("mcaOffsetZ", 0));
 			nameBuilder.gridNumFormat = "r.{0}.{1}";
 		}
 
 		public override bool ValidateSettings(ExportSettings settings, HeightData data)
 		{
-			bool sourceIs512 = (data.GridHeight == 512 && data.GridWidth == 512);
-			if (settings.fileSplitDims != 512 && !sourceIs512)
+			bool sourceIs512 = (data.GridLengthY == 512 && data.GridLengthX == 512);
+			if (settings.splitInterval != 512 && !sourceIs512)
 			{
 				ConsoleOutput.WriteError("File splitting dimensions must be 512 when exporting to minecraft regions!");
 				return false;

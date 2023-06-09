@@ -16,11 +16,11 @@ namespace HMConMC
 		public override string Extension => "mca";
 		public override FileSupportFlags SupportedActions => FileSupportFlags.Export;
 
-		protected override bool ExportFile(string path, ExportJob job)
+		protected override bool ExportFile(string path, ExportTask task)
 		{
 			using (var stream = BeginWriteStream(path))
 			{
-				new MCWorldExporter(job, false, false).WriteFile(path, stream, this);
+				new MCWorldExporter(task, false, false).WriteFile(path, stream, this);
 			}
 			return true;
 		}

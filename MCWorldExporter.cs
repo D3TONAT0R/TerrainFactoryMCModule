@@ -21,7 +21,7 @@ namespace HMConMC
 
 		public static readonly string defaultBlock = "minecraft:stone";
 
-		public readonly ExportJob job;
+		public readonly ExportTask exportTask;
 
 		public MCUtils.Version desiredVersion;
 		public World world;
@@ -43,15 +43,15 @@ namespace HMConMC
 
 		public WorldPostProcessingStack postProcessor = null;
 
-		public MCWorldExporter(ExportJob job)
+		public MCWorldExporter(ExportTask task)
 		{
-			this.job = job;
-			regionOffsetX = job.exportNumX + job.settings.GetCustomSetting("mcaOffsetX", 0);
-			regionOffsetZ = job.exportNumZ + job.settings.GetCustomSetting("mcaOffsetZ", 0);
-			generateVoid = job.settings.GetCustomSetting("mcVoidGen", false);
-			if(job.settings.HasCustomSetting<string>("mcVersion"))
+			this.exportTask = task;
+			regionOffsetX = task.exportNumX + task.settings.GetCustomSetting("mcaOffsetX", 0);
+			regionOffsetZ = task.exportNumZ + task.settings.GetCustomSetting("mcaOffsetZ", 0);
+			generateVoid = task.settings.GetCustomSetting("mcVoidGen", false);
+			if(task.settings.HasCustomSetting<string>("mcVersion"))
 			{
-				desiredVersion = MCUtils.Version.Parse(job.settings.GetCustomSetting("mcVersion", ""));
+				desiredVersion = MCUtils.Version.Parse(task.settings.GetCustomSetting("mcVersion", ""));
 			}
 			else
 			{
@@ -59,7 +59,7 @@ namespace HMConMC
 			}
 			int xmin = regionOffsetX * 512;
 			int zmin = regionOffsetZ * 512;
-			var hmapFlipped = job.data.GetDataGridFlipped();
+			var hmapFlipped = task.data.GetDataGridFlipped();
 			heightmapLengthX = hmapFlipped.GetLength(0);
 			heightmapLengthZ = hmapFlipped.GetLength(1);
 			worldBounds = new Bounds(xmin, zmin, xmin + heightmapLengthX - 1, zmin + heightmapLengthZ - 1);
@@ -79,25 +79,25 @@ namespace HMConMC
 			}
 		}
 
-		public MCWorldExporter(ExportJob job, bool customPostProcessing, bool useDefaultPostProcessing) : this(job)
+		public MCWorldExporter(ExportTask task, bool customPostProcessing, bool useDefaultPostProcessing) : this(task)
 		{
-			this.job = job;
+			this.exportTask = task;
 			if(customPostProcessing)
 			{
 				string xmlPath;
-				if(job.settings.HasCustomSetting<string>("mcpostfile"))
+				if(task.settings.HasCustomSetting<string>("mcpostfile"))
 				{
-					xmlPath = Path.Combine(Path.GetDirectoryName(job.data.filename), job.settings.GetCustomSetting("mcpostfile", ""));
+					xmlPath = Path.Combine(Path.GetDirectoryName(task.data.filename), task.settings.GetCustomSetting("mcpostfile", ""));
 					if(Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
 				}
 				else
 				{
-					xmlPath = Path.ChangeExtension(job.FilePath, null) + "-postprocess.xml";
+					xmlPath = Path.ChangeExtension(task.FilePath, null) + "-postprocess.xml";
 				}
 				try
 				{
 					postProcessor = new WorldPostProcessingStack(this);
-					postProcessor.CreateFromXML(job.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
+					postProcessor.CreateFromXML(task.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.GridLengthX, task.data.GridLengthY);
 				}
 				catch(Exception e)
 				{
@@ -105,7 +105,7 @@ namespace HMConMC
 					{
 						ConsoleOutput.WriteWarning("Failed to create post processing stack from xml, falling back to default post processing stack. " + e.Message);
 						postProcessor = new WorldPostProcessingStack(this);
-						postProcessor.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
+						postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.GridLengthX, task.data.GridLengthY);
 					}
 					else
 					{
@@ -116,9 +116,9 @@ namespace HMConMC
 			else if(useDefaultPostProcessing)
 			{
 				postProcessor = new WorldPostProcessingStack(this);
-				postProcessor.CreateDefaultPostProcessor(job.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, job.data.GridWidth, job.data.GridHeight);
+				postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.GridLengthX, task.data.GridLengthY);
 			}
-			if(job.settings.GetCustomSetting("mcAnalyzeBlocks", false))
+			if(task.settings.GetCustomSetting("mcAnalyzeBlocks", false))
 			{
 				if(!postProcessor.ContinsGeneratorOfType(typeof(BlockDistributionAnalysisPostProcessor)))
 				{

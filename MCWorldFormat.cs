@@ -15,9 +15,9 @@ namespace HMConMC
 		public override string Extension => "";
 		public override FileSupportFlags SupportedActions => FileSupportFlags.Export;
 
-		protected override bool ExportFile(string path, ExportJob job)
+		protected override bool ExportFile(string path, ExportTask task)
 		{
-			new MCWorldExporter(job, true, true).WriteFile(path, null, this);
+			new MCWorldExporter(task, true, true).WriteFile(path, null, this);
 			return true;
 		}
 	}
