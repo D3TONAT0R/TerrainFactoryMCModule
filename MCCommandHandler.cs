@@ -15,7 +15,7 @@ namespace HMConMC {
 			list.Add(new ConsoleCommand("mcvoid", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world", HandleVoidGenCmd));
 		}
 
-		private bool HandleOffsetCmd(Job job, string[] args) {
+		private bool HandleOffsetCmd(Worksheet job, string[] args) {
 			int x = ConsoleCommand.ParseArg<int>(args, 0);
 			int z = ConsoleCommand.ParseArg<int>(args, 1);
 			job.exportSettings.SetCustomSetting("mcaOffsetX", x);
@@ -24,7 +24,7 @@ namespace HMConMC {
 			return true;
 		}
 
-		private bool HandlePostProcessingCmd(Job job, string[] args) {
+		private bool HandlePostProcessingCmd(Worksheet job, string[] args) {
 
 			if (args.Length > 0)
 			{
@@ -42,7 +42,7 @@ namespace HMConMC {
 			return true;
 		}
 
-		private bool HandleVoidGenCmd(Job job, string[] args)
+		private bool HandleVoidGenCmd(Worksheet job, string[] args)
 		{
 			bool value;
 			if(args.Length > 0 && int.TryParse(args[0], out int i))
@@ -58,7 +58,7 @@ namespace HMConMC {
 			return true;
 		}
 
-		private bool HandleVersionCmd(Job job, string[] args)
+		private bool HandleVersionCmd(Worksheet job, string[] args)
 		{
 			if(args.Length > 0)
 			{
