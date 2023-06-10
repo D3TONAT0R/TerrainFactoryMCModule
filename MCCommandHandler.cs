@@ -9,10 +9,10 @@ namespace HMConMC {
 	public class MCCommandHandler : HMConCommandHandler {
 
 		public override void AddCommands(List<ConsoleCommand> list) {
-			list.Add(new ConsoleCommand("mcversion", "<Version>", "[MC*] Change target minecraft version", HandleVersionCmd));
-			list.Add(new ConsoleCommand("mcaoffset", "X Z", "[MC*] Apply offset to region terrain, in regions (512)", HandleOffsetCmd));
-			list.Add(new ConsoleCommand("mcpostprocess", "", "[MC*] Run various world generators defined in a separate XML file", HandlePostProcessingCmd));
-			list.Add(new ConsoleCommand("mcvoid", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world", HandleVoidGenCmd));
+			list.Add(new ConsoleCommand("mc-version", "<Version>", "[MC*] Change target minecraft version", HandleVersionCmd));
+			list.Add(new ConsoleCommand("mc-offset", "X Z", "[MC*] Apply offset to region terrain, in regions (512)", HandleOffsetCmd));
+			list.Add(new ConsoleCommand("mc-postprocess", "", "[MC*] Run various world generators defined in a separate XML file", HandlePostProcessingCmd));
+			list.Add(new ConsoleCommand("mc-void", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world", HandleVoidGenCmd));
 		}
 
 		private bool HandleOffsetCmd(Worksheet sheet, string[] args) {
