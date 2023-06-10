@@ -15,34 +15,34 @@ namespace HMConMC {
 			list.Add(new ConsoleCommand("mcvoid", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world", HandleVoidGenCmd));
 		}
 
-		private bool HandleOffsetCmd(Worksheet job, string[] args) {
+		private bool HandleOffsetCmd(Worksheet sheet, string[] args) {
 			int x = ConsoleCommand.ParseArg<int>(args, 0);
 			int z = ConsoleCommand.ParseArg<int>(args, 1);
-			job.exportSettings.SetCustomSetting("mcaOffsetX", x);
-			job.exportSettings.SetCustomSetting("mcaOffsetZ", z);
+			sheet.exportSettings.SetCustomSetting("mcaOffsetX", x);
+			sheet.exportSettings.SetCustomSetting("mcaOffsetZ", z);
 			ConsoleOutput.WriteLine("MCA terrain offset set to " + x + "," + z + " (" + (x * 512) + " blocks , " + z * 512 + " blocks)");
 			return true;
 		}
 
-		private bool HandlePostProcessingCmd(Worksheet job, string[] args) {
+		private bool HandlePostProcessingCmd(Worksheet sheet, string[] args) {
 
 			if (args.Length > 0)
 			{
-				bool b = job.exportSettings.GetCustomSetting("mcpostprocess", false);
-				if (!b) job.exportSettings.SetCustomSetting("mcpostprocess", true);
+				bool b = sheet.exportSettings.GetCustomSetting("mcpostprocess", false);
+				if (!b) sheet.exportSettings.SetCustomSetting("mcpostprocess", true);
 				string file = args[0];
-				job.exportSettings.SetCustomSetting("mcpostfile", file);
+				sheet.exportSettings.SetCustomSetting("mcpostfile", file);
 				ConsoleOutput.WriteLine($"MC World Post Processing enabled (using '{file}.xml').");
 			}
 			else
 			{
-				bool b2 = job.exportSettings.ToggleCustomBoolSetting("mcpostprocess");
+				bool b2 = sheet.exportSettings.ToggleCustomBoolSetting("mcpostprocess");
 				ConsoleOutput.WriteLine("MC World Post Processing " + (b2 ? "enabled" : "disabled"));
 			}
 			return true;
 		}
 
-		private bool HandleVoidGenCmd(Worksheet job, string[] args)
+		private bool HandleVoidGenCmd(Worksheet sheet, string[] args)
 		{
 			bool value;
 			if(args.Length > 0 && int.TryParse(args[0], out int i))
@@ -51,24 +51,24 @@ namespace HMConMC {
 			}
 			else
 			{
-				value = !job.exportSettings.GetCustomSetting("mcVoidGen", false);
+				value = !sheet.exportSettings.GetCustomSetting("mcVoidGen", false);
 			}
-			job.exportSettings.SetCustomSetting("mcVoidGen", value);
+			sheet.exportSettings.SetCustomSetting("mcVoidGen", value);
 			ConsoleOutput.WriteLine("MC void world generation " + (value ? "enabled" : "disabled"));
 			return true;
 		}
 
-		private bool HandleVersionCmd(Worksheet job, string[] args)
+		private bool HandleVersionCmd(Worksheet sheet, string[] args)
 		{
 			if(args.Length > 0)
 			{
 				Version v = Version.Parse(args[0]);
-				job.exportSettings.SetCustomSetting("mcVersion", v);
+				sheet.exportSettings.SetCustomSetting("mcVersion", v);
 				ConsoleOutput.WriteLine("MC world version set to " + v.ToString());
 			}
 			else
 			{
-				job.exportSettings.RemoveCustomSetting("mcVersion");
+				sheet.exportSettings.RemoveCustomSetting("mcVersion");
 				ConsoleOutput.WriteLine("MC world version reset to default.");
 			}
 			return true;
