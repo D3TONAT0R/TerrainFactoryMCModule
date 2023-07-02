@@ -17,7 +17,7 @@ namespace HMConMC {
 			}
 			asc.filename = Path.GetFileNameWithoutExtension(filepath);
 			asc.cellSize = 1;
-			asc.nodata_value = -9999;
+			asc.nodataValue = -9999;
 			asc.RecalculateValues(false);
 			asc.lowPoint = 0;
 			asc.highPoint = 255;
