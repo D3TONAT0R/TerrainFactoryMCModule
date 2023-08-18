@@ -1,4 +1,4 @@
-﻿using HMCon;
+﻿using TerrainFactory;
 using MCUtils;
 using MCUtils.Coordinates;
 using System;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 	class ThawingPostProcessor : AbstractPostProcessor
 	{

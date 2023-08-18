@@ -1,10 +1,10 @@
-﻿using HMCon;
-using HMCon.Formats;
+﻿using TerrainFactory;
+using TerrainFactory.Formats;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HMConMC
+namespace TerrainFactory.Modules.MC
 {
 	public class MCBetaRegionFormat : MCRegionFormat
 	{

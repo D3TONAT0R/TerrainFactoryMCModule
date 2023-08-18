@@ -2,7 +2,7 @@ using MCUtils;
 using MCUtils.Coordinates;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors {
+namespace TerrainFactory.Modules.MC.PostProcessors {
 	public class NaturalTerrainPostProcessor : AbstractPostProcessor {
 
 		public override Priority OrderPriority => Priority.BeforeDefault;

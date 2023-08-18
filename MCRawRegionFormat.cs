@@ -1,11 +1,11 @@
-﻿using HMCon;
-using HMCon.Export;
-using HMCon.Formats;
+﻿using TerrainFactory;
+using TerrainFactory.Export;
+using TerrainFactory.Formats;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HMConMC
+namespace TerrainFactory.Modules.MC
 {
 	public class MCRawRegionFormat : MCRegionFormat
 	{

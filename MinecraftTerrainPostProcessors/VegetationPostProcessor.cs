@@ -3,7 +3,7 @@ using MCUtils.Coordinates;
 using System;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors {
+namespace TerrainFactory.Modules.MC.PostProcessors {
 	public class VegetationPostProcessor : AbstractPostProcessor {
 
 		readonly byte[,,] blueprintOakTreeTop = new byte[,,] {

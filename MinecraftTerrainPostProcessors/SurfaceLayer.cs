@@ -1,6 +1,6 @@
-﻿using HMCon;
-using HMCon.Util;
-using HMConMC.PostProcessors.Splatmapper;
+﻿using TerrainFactory;
+using TerrainFactory.Util;
+using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
 using MCUtils;
 using MCUtils.Coordinates;
 using NoiseGenerator;
@@ -10,7 +10,7 @@ using System.Drawing;
 using System.Text;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors.Splatmapper
+namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
 	public abstract class SurfaceLayerGenerator
 	{

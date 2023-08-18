@@ -1,14 +1,14 @@
-﻿using HMCon;
-using HMCon.Export;
-using HMCon.Formats;
-using HMCon.Import;
-using HMCon.Util;
+﻿using TerrainFactory;
+using TerrainFactory.Export;
+using TerrainFactory.Formats;
+using TerrainFactory.Import;
+using TerrainFactory.Util;
 using System;
 using System.Collections.Generic;
 
-namespace HMConMC
+namespace TerrainFactory.Modules.MC
 {
-	public class HMConMCModule : HMConModule
+	public class TerrainFactoryMCModule : TerrainFactoryModule
 	{
 		public override string ModuleID => "MinecraftWorldModule";
 		public override string ModuleName => "Minecraft World Generator / Importer";

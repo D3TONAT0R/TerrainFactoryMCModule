@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 
 	public enum PostProcessType

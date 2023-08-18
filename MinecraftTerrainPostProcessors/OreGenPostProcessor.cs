@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using Version = MCUtils.Version;
 
-namespace HMConMC.PostProcessors.Splatmapper
+namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
 	public class OreGenPostProcessor : AbstractPostProcessor
 	{

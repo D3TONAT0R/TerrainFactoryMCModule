@@ -1,2 +1,2 @@
-# HMConMCModule
- HeightmapConverter (HMCon) Minecraft World Generator / Importer Module
+# TerrainFactoryMCModule
+ TerrainFactory Minecraft World Generator / Importer Module

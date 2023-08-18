@@ -1,13 +1,13 @@
-﻿using HMConImage;
-using HMCon;
-using HMCon.Export;
+﻿using TerrainFactory.Modules.Images;
+using TerrainFactory;
+using TerrainFactory.Export;
 using MCUtils;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using HMCon.Util;
+using TerrainFactory.Util;
 
-namespace HMConMC {
+namespace TerrainFactory.Modules.MC {
 	public class OverviewmapExporter {
 
 		Bitmap map;

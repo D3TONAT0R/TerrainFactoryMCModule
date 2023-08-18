@@ -1,4 +1,4 @@
-﻿using HMCon;
+﻿using TerrainFactory;
 using MCUtils;
 using MCUtils.Coordinates;
 using System;
@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors.Splatmapper
+namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
 	public class SplatmappedTerrainPostProcessor : AbstractPostProcessor
 	{

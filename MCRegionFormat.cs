@@ -1,12 +1,12 @@
-﻿using HMCon;
-using HMCon.Export;
-using HMCon.Formats;
-using HMCon.Util;
+﻿using TerrainFactory;
+using TerrainFactory.Export;
+using TerrainFactory.Formats;
+using TerrainFactory.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace HMConMC
+namespace TerrainFactory.Modules.MC
 {
 	public class MCRegionFormat : FileFormat
 	{

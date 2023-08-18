@@ -1,8 +1,8 @@
-using HMCon;
-using HMCon.Export;
-using HMCon.Import;
-using HMConImage;
-using HMConMC.PostProcessors.Splatmapper;
+using TerrainFactory;
+using TerrainFactory.Export;
+using TerrainFactory.Import;
+using TerrainFactory.Modules.Images;
+using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
 using MCUtils;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 	public class WorldPostProcessingStack
 	{

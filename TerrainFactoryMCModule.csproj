@@ -8,8 +8,8 @@
     <Description></Description>
     <PackageId></PackageId>
     <Product />
-    <RootNamespace>HMConMC</RootNamespace>
-    <AssemblyName>HMConMCModule</AssemblyName>
+    <RootNamespace>TerrainFactory.Modules.MC</RootNamespace>
+    <AssemblyName>TerrainFactoryMCModule</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
@@ -24,12 +24,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\NoiseGenerator\NoiseGenerator.csproj" />
-    <ProjectReference Include="..\HMConImageModule\HMConImageModule.csproj">
+    <ProjectReference Include="..\TerrainFactoryImageModule\TerrainFactoryImageModule.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
     <ProjectReference Include="..\..\MCUtils\MCUtils.csproj" />
-    <ProjectReference Include="..\HMCon\HMCon.csproj">
+    <ProjectReference Include="..\TerrainFactory\TerrainFactory.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call $(SolutionDir)\HMCon\copy_modules.bat $(TargetDir) $(SolutionDir) $(Configuration) $(ProjectName)" />
+    <Exec Command="call $(SolutionDir)\$(SolutionName)\copy_modules.bat $(TargetDir) $(SolutionDir) $(Configuration) $(ProjectName)" />
   </Target>
 
 </Project>

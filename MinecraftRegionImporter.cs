@@ -1,10 +1,10 @@
-using HMCon;
-using HMCon.Import;
+using TerrainFactory;
+using TerrainFactory.Import;
 using MCUtils;
 using System.Collections.Generic;
 using System.IO;
 
-namespace HMConMC {
+namespace TerrainFactory.Modules.MC {
 	public static class MinecraftRegionImporter {
 
 		public static HeightData ImportHeightmap(string filepath, HeightmapType type) {

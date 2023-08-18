@@ -2,7 +2,7 @@
 using MCUtils.Coordinates;
 using System;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 	public abstract class Layer
 	{

@@ -1,6 +1,6 @@
-using HMCon;
-using HMCon.Util;
-using HMConImage;
+using TerrainFactory;
+using TerrainFactory.Util;
+using TerrainFactory.Modules.Images;
 using MCUtils;
 using MCUtils.Coordinates;
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors.Splatmapper
+namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
 	public class SnowPostProcessor : AbstractPostProcessor
 	{

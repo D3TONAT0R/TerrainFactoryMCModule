@@ -1,4 +1,4 @@
-using HMCon;
+using TerrainFactory;
 using System.Drawing;
 
 public class CommonSplatmapColors {

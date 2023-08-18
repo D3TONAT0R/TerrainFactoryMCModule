@@ -1,10 +1,10 @@
 
-using HMCon;
-using HMCon.Export;
-using HMCon.Formats;
-using HMCon.Util;
-using HMConImage;
-using HMConMC.PostProcessors;
+using TerrainFactory;
+using TerrainFactory.Export;
+using TerrainFactory.Formats;
+using TerrainFactory.Util;
+using TerrainFactory.Modules.Images;
+using TerrainFactory.Modules.MC.PostProcessors;
 using Ionic.Zlib;
 using MCUtils;
 using System;
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace HMConMC
+namespace TerrainFactory.Modules.MC
 {
 	public class MCWorldExporter
 	{

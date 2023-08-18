@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 	public enum ColorChannel
 	{

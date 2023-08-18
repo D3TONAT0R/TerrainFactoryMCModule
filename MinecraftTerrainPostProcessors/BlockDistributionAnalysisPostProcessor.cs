@@ -1,12 +1,12 @@
-﻿using HMCon;
-using HMCon.Export;
-using HMCon.Util;
+﻿using TerrainFactory;
+using TerrainFactory.Export;
+using TerrainFactory.Util;
 using MCUtils;
 using MCUtils.Utilities.BlockDistributionAnalysis;
 using System;
 using System.Xml.Linq;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 	public class BlockDistributionAnalysisPostProcessor : AbstractPostProcessor
 	{

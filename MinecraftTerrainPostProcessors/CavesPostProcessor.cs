@@ -1,6 +1,6 @@
-﻿using HMCon;
-using HMCon.Util;
-using HMConMC.PostProcessors;
+﻿using TerrainFactory;
+using TerrainFactory.Util;
+using TerrainFactory.Modules.MC.PostProcessors;
 using MCUtils;
 using MCUtils.Coordinates;
 using System;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Xml.Linq;
 using Vector3 = System.Numerics.Vector3;
 
-namespace HMConMC.PostProcessors
+namespace TerrainFactory.Modules.MC.PostProcessors
 {
 	public class CavesPostProcessor : AbstractPostProcessor
 	{
