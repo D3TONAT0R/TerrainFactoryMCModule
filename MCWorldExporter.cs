@@ -59,7 +59,7 @@ namespace TerrainFactory.Modules.MC
 			}
 			int xmin = regionOffsetX * 512;
 			int zmin = regionOffsetZ * 512;
-			var hmapFlipped = task.data.GetDataGridFlipped();
+			var hmapFlipped = task.data.GetDataGridYFlipped();
 			heightmapLengthX = hmapFlipped.GetLength(0);
 			heightmapLengthZ = hmapFlipped.GetLength(1);
 			worldBounds = new Bounds(xmin, zmin, xmin + heightmapLengthX - 1, zmin + heightmapLengthZ - 1);
@@ -87,7 +87,7 @@ namespace TerrainFactory.Modules.MC
 				string xmlPath;
 				if(task.settings.HasCustomSetting<string>("mcpostfile"))
 				{
-					xmlPath = Path.Combine(Path.GetDirectoryName(task.data.filename), task.settings.GetCustomSetting("mcpostfile", ""));
+					xmlPath = Path.Combine(Path.GetDirectoryName(task.data.SourceFileName), task.settings.GetCustomSetting("mcpostfile", ""));
 					if(Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
 				}
 				else
@@ -97,7 +97,7 @@ namespace TerrainFactory.Modules.MC
 				try
 				{
 					postProcessor = new WorldPostProcessingStack(this);
-					postProcessor.CreateFromXML(task.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.GridLengthX, task.data.GridLengthY);
+					postProcessor.CreateFromXML(task.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
 				}
 				catch(Exception e)
 				{
@@ -105,7 +105,7 @@ namespace TerrainFactory.Modules.MC
 					{
 						ConsoleOutput.WriteWarning("Failed to create post processing stack from xml, falling back to default post processing stack. " + e.Message);
 						postProcessor = new WorldPostProcessingStack(this);
-						postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.GridLengthX, task.data.GridLengthY);
+						postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
 					}
 					else
 					{
@@ -116,7 +116,7 @@ namespace TerrainFactory.Modules.MC
 			else if(useDefaultPostProcessing)
 			{
 				postProcessor = new WorldPostProcessingStack(this);
-				postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.GridLengthX, task.data.GridLengthY);
+				postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
 			}
 			if(task.settings.GetCustomSetting("mcAnalyzeBlocks", false))
 			{

@@ -7,26 +7,23 @@ using System.IO;
 namespace TerrainFactory.Modules.MC {
 	public static class MinecraftRegionImporter {
 
-		public static HeightData ImportHeightmap(string filepath, HeightmapType type) {
+		public static ElevationData ImportHeightmap(string filepath, HeightmapType type) {
 			short[,] hms = RegionLoader.GetHeightmap(filepath, type);
-			HeightData asc = new HeightData(512, 512, filepath);
+			ElevationData data = new ElevationData(512, 512, filepath);
 			for(int x = 0; x < 512; x++) {
 				for(int z = 0; z < 512; z++) {
-					asc.SetHeight(x, z, hms[x, 511 - z]);
+					data.SetHeightAt(x, z, hms[x, 511 - z]);
 				}
 			}
-			asc.filename = Path.GetFileNameWithoutExtension(filepath);
-			asc.cellSize = 1;
-			asc.nodataValue = -9999;
-			asc.RecalculateValues(false);
-			asc.lowPoint = 0;
-			asc.highPoint = 255;
-			asc.isValid = true;
-			ConsoleOutput.WriteLine("Lowest: " + asc.lowestValue);
-			ConsoleOutput.WriteLine("Hightest: " + asc.highestValue);
-			asc.lowestValue = 0;
-			asc.highestValue = 255;
-			return asc;
+			data.SourceFileName = Path.GetFileNameWithoutExtension(filepath);
+			data.CellSize = 1;
+			data.NoDataValue = -9999;
+			data.RecalculateElevationRange(false);
+			data.OverrideLowPoint = 0;
+			data.OverrideHighPoint = 255;
+			ConsoleOutput.WriteLine("Lowest: " + data.MinElevation);
+			ConsoleOutput.WriteLine("Hightest: " + data.MaxElevation);
+			return data;
 		}
 	}
 }

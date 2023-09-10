@@ -26,10 +26,10 @@ namespace TerrainFactory.Modules.MC {
 
 		public OverviewmapExporter(MCWorldExporter world, bool mcMapStyle, HeightmapType type = HeightmapType.SolidBlocks) {
 			var heightmap = world.GetHeightmap(type, true);
-			HeightData heightData = new HeightData(ArrayConverter.ToFloatMap(ArrayConverter.Flip(heightmap)), 1)
+			ElevationData heightData = new ElevationData(ArrayConverter.ToFloatMap(ArrayConverter.Flip(heightmap)), 1)
 			{
-				lowPoint = 0,
-				highPoint = 256
+				OverrideLowPoint = 0,
+				OverrideHighPoint = 256
 			};
 			map = world.world.GetSurfaceMap(world.worldBounds.xMin, world.worldBounds.yMin, heightmap, mcMapStyle);
 			if (!mcMapStyle)
@@ -38,7 +38,7 @@ namespace TerrainFactory.Modules.MC {
 			}
 		}
 
-		private Bitmap GenerateShadedMap(HeightData data, Bitmap surface) {
+		private Bitmap GenerateShadedMap(ElevationData data, Bitmap surface) {
 			return ImageExporter.GenerateCompositeMap(data, surface, 0.3f, 0.3f);
 		}
 

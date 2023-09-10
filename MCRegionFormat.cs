@@ -17,7 +17,7 @@ namespace TerrainFactory.Modules.MC
 		public override string Extension => "mca";
 		public override FileSupportFlags SupportedActions => FileSupportFlags.ImportAndExport;
 
-		protected override HeightData ImportFile(string importPath, params string[] args)
+		protected override ElevationData ImportFile(string importPath, params string[] args)
 		{
 			//TODO: control heightmap type with args
 			return MinecraftRegionImporter.ImportHeightmap(importPath, MCUtils.HeightmapType.TerrainBlocksNoLiquid);
@@ -38,9 +38,9 @@ namespace TerrainFactory.Modules.MC
 			nameBuilder.gridNumFormat = "r.{0}.{1}";
 		}
 
-		public override bool ValidateSettings(ExportSettings settings, HeightData data)
+		public override bool ValidateSettings(ExportSettings settings, ElevationData data)
 		{
-			bool sourceIs512 = (data.GridLengthY == 512 && data.GridLengthX == 512);
+			bool sourceIs512 = (data.CellCountY == 512 && data.CellCountX == 512);
 			if (settings.splitInterval != 512 && !sourceIs512)
 			{
 				ConsoleOutput.WriteError("File splitting dimensions must be 512 when exporting to minecraft regions!");
