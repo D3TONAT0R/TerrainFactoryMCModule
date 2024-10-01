@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\NoiseGenerator\NoiseGenerator.csproj" />
-    <ProjectReference Include="..\TerrainFactoryImageModule\TerrainFactoryImageModule.csproj">
+    <ProjectReference Include="..\TerrainFactoryBitmaps\TerrainFactoryBitmaps.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
