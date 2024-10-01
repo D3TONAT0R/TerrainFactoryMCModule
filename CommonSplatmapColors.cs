@@ -1,7 +1,8 @@
-using TerrainFactory;
 using System.Drawing;
+using TerrainFactory;
 
-public class CommonSplatmapColors {
+public class CommonSplatmapColors
+{
 
 	public static Color white = Color.White;
 	public static Color black = Color.FromArgb(255, 0, 0, 0);
@@ -16,8 +17,10 @@ public class CommonSplatmapColors {
 	public static Color cyan = Color.FromArgb(255, 0, 255, 255);
 	public static Color magenta = Color.FromArgb(255, 255, 0, 255);
 
-	public static Color NameToColor(string s) {
-		switch(s.ToLower()) {
+	public static Color NameToColor(string s)
+	{
+		switch(s.ToLower())
+		{
 			case "w":
 			case "white": return white;
 			case "k":

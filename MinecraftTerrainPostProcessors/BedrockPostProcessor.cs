@@ -1,10 +1,11 @@
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
 using System.Xml.Linq;
+using WorldForge;
+using WorldForge.Coordinates;
 
-namespace TerrainFactory.Modules.MC.PostProcessors {
-	public class BedrockPostProcessor : AbstractPostProcessor {
+namespace TerrainFactory.Modules.MC.PostProcessors
+{
+	public class BedrockPostProcessor : AbstractPostProcessor
+	{
 
 		public bool flatBedrock = false;
 
@@ -17,12 +18,12 @@ namespace TerrainFactory.Modules.MC.PostProcessors {
 
 		public BedrockPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
-			
+
 		}
 
-		protected override void OnProcessBlock(World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessBlock(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
-			if(random.NextDouble() < 1f - pos.y / 4f && !world.IsAirOrNull(pos)) world.SetBlock(pos, "minecraft:bedrock");
+			if(random.NextDouble() < 1f - pos.y / 4f && !dim.IsAirOrNull(pos)) dim.SetBlock(pos, "minecraft:bedrock");
 		}
 	}
 }

@@ -1,9 +1,4 @@
-﻿using TerrainFactory;
-using TerrainFactory.Export;
-using TerrainFactory.Formats;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using TerrainFactory.Export;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -18,7 +13,7 @@ namespace TerrainFactory.Modules.MC
 
 		protected override bool ExportFile(string path, ExportTask task)
 		{
-			using (var stream = BeginWriteStream(path))
+			using(var stream = BeginWriteStream(path))
 			{
 				new MCWorldExporter(task, false, false).WriteFile(path, stream, this);
 			}

@@ -1,10 +1,6 @@
-﻿using TerrainFactory;
-using TerrainFactory.Export;
-using TerrainFactory.Formats;
-using TerrainFactory.Import;
-using TerrainFactory.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using TerrainFactory.Formats;
 
 namespace TerrainFactory.Modules.MC
 {

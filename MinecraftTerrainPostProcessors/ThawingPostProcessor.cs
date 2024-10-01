@@ -1,10 +1,8 @@
-﻿using TerrainFactory;
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml.Linq;
+using WorldForge;
+using WorldForge.Biomes;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -41,15 +39,15 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		}
 
-		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
 			//Replace snowy biomes with normal biomes
-			var biome = world.GetBiome(pos.x, pos.z);
-			if (biome.HasValue)
+			var biome = dim.GetBiome(pos.x, pos.z);
+			if(biome.HasValue)
 			{
-				if (biomeDeIcingTable.ContainsKey(biome.Value))
+				if(biomeDeIcingTable.ContainsKey(biome.Value))
 				{
-					world.SetBiome(pos.x, pos.z, biomeDeIcingTable[biome.Value]);
+					dim.SetBiome(pos.x, pos.z, biomeDeIcingTable[biome.Value]);
 				}
 			}
 			else
@@ -58,20 +56,20 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			}
 		}
 
-		protected override void OnProcessBlock(World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessBlock(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
-			if (world.IsAirOrNull(pos)) return;
+			if(dim.IsAirOrNull(pos)) return;
 			//Replace snowy blocks with air or water
-			BlockState block = world.GetBlockState(pos);
-			if (block == null) return;
-			if (block.properties.Contains("snowy"))
+			BlockState block = dim.GetBlockState(pos);
+			if(block == null) return;
+			if(block.HasProperty("snowy"))
 			{
 				//Replace block with itself to get rid of the "snowy" property
-				world.SetBlock(pos, block.block.ID);
+				dim.SetBlock(pos, block.block.ID);
 			}
-			else if (blockReplacementTable.ContainsKey(block.block.ID))
+			else if(blockReplacementTable.ContainsKey(block.block.ID))
 			{
-				world.SetBlock(pos, blockReplacementTable[block.block.ID]);
+				dim.SetBlock(pos, blockReplacementTable[block.block.ID]);
 			}
 		}
 	}

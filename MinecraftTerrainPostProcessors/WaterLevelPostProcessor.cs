@@ -1,11 +1,10 @@
-using TerrainFactory;
-using TerrainFactory.Util;
-using TerrainFactory.Modules.Images;
-using MCUtils;
-using MCUtils.Coordinates;
 using System;
 using System.IO;
 using System.Xml.Linq;
+using TerrainFactory.Modules.Images;
+using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
@@ -23,29 +22,29 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			worldOriginOffsetX = offsetX;
 			worldOriginOffsetZ = offsetZ;
 			var fileXml = xml.Element("file");
-			if (fileXml != null)
+			if(fileXml != null)
 			{
 				string path = Path.Combine(rootPath, xml.Element("file").Value);
 				waterSurfaceMap = ArrayConverter.Flip(HeightmapImporter.ImportHeightmapRaw(path, 0, 0, sizeX, sizeZ));
 			}
 			xml.TryParseInt("waterlevel", ref waterLevel);
-			if (xml.Element("waterblock") != null) waterBlock = xml.Element("waterblock").Value;
+			if(xml.Element("waterblock") != null) waterBlock = xml.Element("waterblock").Value;
 			ConsoleOutput.WriteLine("Water mapping enabled");
 		}
 
-		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
 			int start = waterLevel;
-			if (waterSurfaceMap != null)
+			if(waterSurfaceMap != null)
 			{
 				start = Math.Max(waterSurfaceMap?[pos.x - worldOriginOffsetX, pos.z - worldOriginOffsetZ] ?? (short)-1, waterLevel);
 			}
-			for (int y2 = start; y2 > pos.y; y2--)
+			for(int y2 = start; y2 > pos.y; y2--)
 			{
 				BlockCoord pos2 = (pos.x, y2, pos.z);
-				if (world.IsAirOrNull(pos2))
+				if(dim.IsAirOrNull(pos2))
 				{
-					world.SetBlock(pos2, waterBlock);
+					dim.SetBlock(pos2, waterBlock);
 				}
 			}
 		}

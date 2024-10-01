@@ -1,10 +1,4 @@
-﻿using TerrainFactory;
-using TerrainFactory.Formats;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TerrainFactory.Modules.MC
+﻿namespace TerrainFactory.Modules.MC
 {
 	public class MCBetaRegionFormat : MCRegionFormat
 	{

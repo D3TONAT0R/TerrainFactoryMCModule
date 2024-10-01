@@ -1,12 +1,9 @@
-﻿using TerrainFactory;
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Xml.Linq;
+using WorldForge;
+using WorldForge.Coordinates;
+using Color = System.Drawing.Color;
 
 namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
@@ -22,10 +19,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			: base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
 		{
 			string mapFileName = Path.Combine(rootPath, xml.Attribute("file").Value);
-			foreach (var layer in xml.Elements("layer"))
+			foreach(var layer in xml.Elements("layer"))
 			{
 				XAttribute colorAttr = layer.Attribute("color");
-				if (colorAttr == null)
+				if(colorAttr == null)
 				{
 					ConsoleOutput.WriteError("layer is missing required attribute 'color': " + layer.ToString().Trim());
 					continue;
@@ -33,17 +30,17 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 				var color = ParseColor(colorAttr.Value);
 				var surfaceLayer = new SurfaceLayer(color, layer.Attribute("name")?.Value);
 				layers.Add(surfaceLayer);
-				foreach (var elem in layer.Elements())
+				foreach(var elem in layer.Elements())
 				{
-					if (elem.Name.LocalName == "surface")
+					if(elem.Name.LocalName == "surface")
 					{
 						surfaceLayer.AddSurfaceGenerator(elem);
 					}
-					else if (elem.Name.LocalName == "gen")
+					else if(elem.Name.LocalName == "gen")
 					{
 						surfaceLayer.AddSchematicGenerator(this, elem);
 					}
-					else if (elem.Name.LocalName == "biome")
+					else if(elem.Name.LocalName == "biome")
 					{
 						surfaceLayer.AddBiomeGenerator(elem);
 					}
@@ -51,7 +48,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			}
 
 			Color[] mappedColors = new Color[layers.Count];
-			for (int i = 0; i < layers.Count; i++)
+			for(int i = 0; i < layers.Count; i++)
 			{
 				mappedColors[i] = layers[i].layerColor;
 			}
@@ -63,7 +60,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 		Color ParseColor(string input)
 		{
 			Color c;
-			if (input.Contains(","))
+			if(input.Contains(","))
 			{
 				//It's a manually defined color
 				string[] cs = input.Split(',');
@@ -79,12 +76,12 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			return c;
 		}
 
-		protected override void OnProcessSurface (World w, BlockCoord topPos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord topPos, int pass, float mask)
 		{
 			byte i = map.GetValue(topPos.x - worldOriginOffsetX, topPos.z - worldOriginOffsetZ);
-			if (i < 255)
+			if(i < 255)
 			{
-				layers[i].RunGenerator(w, topPos);
+				layers[i].RunGenerator(dim, topPos);
 			}
 		}
 	}

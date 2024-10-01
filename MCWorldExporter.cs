@@ -1,18 +1,13 @@
-
-using TerrainFactory;
-using TerrainFactory.Export;
-using TerrainFactory.Formats;
-using TerrainFactory.Util;
-using TerrainFactory.Modules.Images;
-using TerrainFactory.Modules.MC.PostProcessors;
-using Ionic.Zlib;
-using MCUtils;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using TerrainFactory.Export;
+using TerrainFactory.Formats;
+using TerrainFactory.Modules.MC.PostProcessors;
+using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Biomes;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -23,8 +18,9 @@ namespace TerrainFactory.Modules.MC
 
 		public readonly ExportTask exportTask;
 
-		public MCUtils.Version desiredVersion;
+		public GameVersion desiredVersion;
 		public World world;
+		public Dimension Dimension => world.Overworld;
 		public byte[,] heightmap;
 
 		public bool generateOverviewMap = false;
@@ -51,11 +47,11 @@ namespace TerrainFactory.Modules.MC
 			generateVoid = task.settings.GetCustomSetting("mcVoidGen", false);
 			if(task.settings.HasCustomSetting<string>("mcVersion"))
 			{
-				desiredVersion = MCUtils.Version.Parse(task.settings.GetCustomSetting("mcVersion", ""));
+				desiredVersion = GameVersion.Parse(task.settings.GetCustomSetting("mcVersion", ""));
 			}
 			else
 			{
-				desiredVersion = MCUtils.Version.DefaultVersion;
+				desiredVersion = GameVersion.DefaultVersion;
 			}
 			int xmin = regionOffsetX * 512;
 			int zmin = regionOffsetZ * 512;
@@ -129,10 +125,15 @@ namespace TerrainFactory.Modules.MC
 
 		private void CreateWorld(string worldName)
 		{
-			world = new World(desiredVersion, regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
+			world = World.CreateNew(desiredVersion, worldName);
+			world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.plains,
+				regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
 			if(generateVoid)
 			{
-				world.levelData.worldGen.OverworldGenerator = LevelData.DimensionGenerator.CreateSuperflatOverworldGenerator(BiomeID.the_void, new LevelData.SuperflatLayer("minecraft:air", 1));
+				var gen = new LevelData.SuperflatDimensionGenerator(DimensionID.Overworld, new LevelData.SuperflatLayer("minecraft:air", 1));
+				gen.biome = BiomeID.the_void;
+				gen.features = false;
+				world.LevelData.worldGen.OverworldGenerator = gen;
 			}
 			world.WorldName = worldName;
 			MakeBaseTerrain();
@@ -153,19 +154,19 @@ namespace TerrainFactory.Modules.MC
 					for(int z = 0; z < heightmapLengthZ; z++)
 					{
 						int lowest = 0;
-						if(desiredVersion >= MCUtils.Version.Release_1(18))
+						if(desiredVersion >= GameVersion.Release_1(18))
 						{
 							lowest = -64;
 							for(int y = -64; y <= heightmap[x, z]; y++)
 							{
-								world.SetBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), deepslate, true);
+								Dimension.SetBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), deepslate, true);
 							}
 						}
 						for(int y = 0; y <= heightmap[x, z]; y++)
 						{
-							world.SetDefaultBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), true);
+							Dimension.SetDefaultBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), true);
 						}
-						world.SetBlock((x, lowest, z), bedrock);
+						Dimension.SetBlock((x, lowest, z), bedrock);
 					}
 				}
 				progress++;
@@ -189,7 +190,7 @@ namespace TerrainFactory.Modules.MC
 			if(filetype is MCRegionFormat)
 			{
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
-				world.WriteRegionFile(stream, regionOffsetX, regionOffsetZ);
+				Dimension.WriteRegionFile(stream, regionOffsetX, regionOffsetZ, desiredVersion);
 			}
 			else if(filetype is MCWorldFormat)
 			{
@@ -215,7 +216,7 @@ namespace TerrainFactory.Modules.MC
 
 		public short[,] GetHeightmap(HeightmapType type, bool keepFlippedZ)
 		{
-			var hm = world.GetHeightmap(worldBounds.xMin, worldBounds.yMin, worldBounds.xMax, worldBounds.yMax, type);
+			var hm = Dimension.GetHeightmap(worldBounds.xMin, worldBounds.yMin, worldBounds.xMax, worldBounds.yMax, type);
 			if(!keepFlippedZ)
 			{
 				hm = ArrayConverter.Flip(hm);

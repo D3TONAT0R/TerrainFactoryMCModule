@@ -1,14 +1,9 @@
-﻿using TerrainFactory;
-using TerrainFactory.Util;
-using TerrainFactory.Modules.MC.PostProcessors;
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Xml.Linq;
+using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Coordinates;
 using Vector3 = System.Numerics.Vector3;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
@@ -27,9 +22,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 			}
 
-			public abstract void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random);
+			public abstract void ProcessBlockColumn(Dimension dim, BlockCoord topPos, float mask, Random random);
 
-			protected bool CarveSphere(World world, Vector3 pos, float radius, bool breakSurface)
+			protected bool CarveSphere(Dimension dim, Vector3 pos, float radius, bool breakSurface)
 			{
 				bool hasCarved = false;
 				int x1 = (int)Math.Floor(pos.X - radius);
@@ -38,15 +33,15 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				int y2 = (int)Math.Ceiling(pos.Y + radius);
 				int z1 = (int)Math.Floor(pos.Z - radius);
 				int z2 = (int)Math.Ceiling(pos.Z + radius);
-				for (int x = x1; x <= x2; x++)
+				for(int x = x1; x <= x2; x++)
 				{
-					for (int y = y1; y <= y2; y++)
+					for(int y = y1; y <= y2; y++)
 					{
-						for (int z = z1; z <= z2; z++)
+						for(int z = z1; z <= z2; z++)
 						{
-							if (Vector3.Distance(new Vector3(x, y, z), pos) < radius)
+							if(Vector3.Distance(new Vector3(x, y, z), pos) < radius)
 							{
-								hasCarved |= CarveBlock(world, (x,y,z), breakSurface);
+								hasCarved |= CarveBlock(dim, (x, y, z), breakSurface);
 							}
 						}
 					}
@@ -54,27 +49,27 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				return hasCarved;
 			}
 
-			protected bool CarveBlock(World world, BlockCoord pos, bool allowSurfaceBreak)
+			protected bool CarveBlock(Dimension dim, BlockCoord pos, bool allowSurfaceBreak)
 			{
-				var b = world.GetBlock(pos);
+				var b = dim.GetBlock(pos);
 
-				if (b == null || Blocks.IsAir(b)) return false;
+				if(b == null || Blocks.IsAir(b)) return false;
 
 				//Can the cave break the surface?
-				if (b.CompareMultiple(Blocks.terrainSurfaceBlocks) && !allowSurfaceBreak)
+				if(b.CompareMultiple(Blocks.terrainSurfaceBlocks) && !allowSurfaceBreak)
 				{
 					return false;
 				}
 
-				if (b != null && !b.CompareMultiple("minecraft:bedrock") && !Blocks.IsLiquid(b))
+				if(b != null && !b.CompareMultiple("minecraft:bedrock") && !Blocks.IsLiquid(b))
 				{
-					if (pos.y <= lavaHeight)
+					if(pos.y <= lavaHeight)
 					{
-						world.SetBlock(pos, lava);
+						dim.SetBlock(pos, lava);
 					}
 					else
 					{
-						world.SetBlock(pos, BlockState.Air);
+						dim.SetBlock(pos, BlockState.Air);
 					}
 					return true;
 				}
@@ -112,15 +107,15 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 			public CaveCarver(XElement elem) : base(elem)
 			{
-				if (elem != null)
+				if(elem != null)
 				{
 					elem.TryParseFloat("amount", ref amount);
-					if (elem.TryGetElement("distribution", out var e))
+					if(elem.TryGetElement("distribution", out var e))
 					{
 						string v = e.Value.ToLower();
-						if (v == "equal") distibution = Distibution.Equal;
-						else if (v == "bottom") distibution = Distibution.FavorBottom;
-						else if (v == "top") distibution = Distibution.FavorTop;
+						if(v == "equal") distibution = Distibution.Equal;
+						else if(v == "bottom") distibution = Distibution.FavorBottom;
+						else if(v == "top") distibution = Distibution.FavorTop;
 					}
 					elem.TryParseInt("y-min", ref yMin);
 					elem.TryParseInt("y-max", ref yMax);
@@ -129,27 +124,27 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				}
 			}
 
-			public override void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random)
+			public override void ProcessBlockColumn(Dimension dim, BlockCoord topPos, float mask, Random random)
 			{
-				if (Chance(amount * 0.15f * invChunkArea * (topPos.y * 0.016f) * mask))
+				if(Chance(amount * 0.15f * invChunkArea * (topPos.y * 0.016f) * mask))
 				{
 					var r = random.NextDouble();
-					if (distibution == Distibution.FavorBottom)
+					if(distibution == Distibution.FavorBottom)
 					{
 						r *= r;
 					}
-					else if (distibution == Distibution.FavorTop)
+					else if(distibution == Distibution.FavorTop)
 					{
 						r = Math.Sqrt(r);
 					}
 					int y = (int)MathUtils.Lerp(yMin, yMax, (float)r);
-					if (y > topPos.y) return;
-					GenerateCave(world, new Vector3(topPos.x, y, topPos.z), 0);
+					if(y > topPos.y) return;
+					GenerateCave(dim, new Vector3(topPos.x, y, topPos.z), 0);
 				}
 			}
 
 
-			private void GenerateCave(World world, Vector3 pos, int iteration, float maxDelta = 1f)
+			private void GenerateCave(Dimension dim, Vector3 pos, int iteration, float maxDelta = 1f)
 			{
 				float delta = RandomRange(maxDelta * 0.25f, maxDelta);
 				int life = (int)(RandomRange(50, 300) * delta);
@@ -159,14 +154,14 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				Vector3 direction = Vector3.Normalize(GetRandomVector3(iteration == 0));
 				float branchingChance = 0;
 				bool breakSurface = Chance(0.4f);
-				if (delta > 0.25f && iteration < 3)
+				if(delta > 0.25f && iteration < 3)
 				{
 					branchingChance = size * 0.01f;
 				}
-				while (life > 0)
+				while(life > 0)
 				{
 					life--;
-					if (!CarveSphere(world, pos, size, breakSurface))
+					if(!CarveSphere(dim, pos, size, breakSurface))
 					{
 						//Nothing was carved, the cave is dead
 						return;
@@ -176,10 +171,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 					direction = Vector3.Normalize(direction);
 					size = MathUtils.Lerp(size, RandomRange(2, 6) * delta, 0.15f);
 					variation = MathUtils.Lerp(variation, RandomRange(0.2f, 1f) * variationScale, 0.1f);
-					if (Chance(branchingChance))
+					if(Chance(branchingChance))
 					{
 						//Start a new branch at the current position
-						GenerateCave(world, pos, iteration + 1, maxDelta * 0.8f);
+						GenerateCave(dim, pos, iteration + 1, maxDelta * 0.8f);
 					}
 					pos += direction;
 				}
@@ -197,8 +192,8 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 			private float Smoothstep(float v, float a, float b)
 			{
-				if (v <= a) return a;
-				if (v >= b) return b;
+				if(v <= a) return a;
+				if(v >= b) return b;
 
 				float t = Math.Min(Math.Max((v - a) / (b - a), 0), 1);
 				return t * t * (3f - 2f * t);
@@ -207,7 +202,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			private Vector3 ApplyYWeights(float y, Vector3 dir)
 			{
 				float weight = 0;
-				if (y < 16)
+				if(y < 16)
 				{
 					weight = Smoothstep(1f - y / 16f, 0, 1);
 				}
@@ -229,7 +224,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 			public CavernCarver(XElement elem) : base(elem)
 			{
-				if (elem != null)
+				if(elem != null)
 				{
 					elem.TryParseInt("y-min", ref yMin);
 					elem.TryParseInt("y-max", ref yMax);
@@ -248,9 +243,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				perlinGen.fractalPersistence = 0.15f * noiseScale;
 			}
 
-			public override void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random)
+			public override void ProcessBlockColumn(Dimension dim, BlockCoord topPos, float mask, Random random)
 			{
-				for (int y = yMin; y <= Math.Min(yMax, topPos.y); y++)
+				for(int y = yMin; y <= Math.Min(yMax, topPos.y); y++)
 				{
 					float perlin = perlinGen.GetPerlinAtCoord(topPos.x, y, topPos.z);
 					perlin = 2f * (perlin - 0.5f) + 0.5f;
@@ -265,9 +260,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 						hw = Math.Sqrt(Math.Cos((y - center) * 3.14f / (center - yMax) * 0.5f));
 					}
 
-					if (perlin * hw * mask > threshold)
+					if(perlin * hw * mask > threshold)
 					{
-						CarveBlock(world, (topPos.x, y, topPos.z), true);
+						CarveBlock(dim, (topPos.x, y, topPos.z), true);
 					}
 				}
 			}
@@ -295,37 +290,37 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				}
 			}
 
-			public override void ProcessBlockColumn(World world, BlockCoord topPos, float mask, Random random)
+			public override void ProcessBlockColumn(Dimension dim, BlockCoord topPos, float mask, Random random)
 			{
-				if (Chance(amount * 0.08f * mask))
+				if(Chance(amount * 0.08f * mask))
 				{
 					int y = random.Next(yMin, yMax);
-					if (y > topPos.y) return;
-					TryGenerateSpring(world, topPos, isLavaSpring ? lavaBlock : waterBlock);
+					if(y > topPos.y) return;
+					TryGenerateSpring(dim, topPos, isLavaSpring ? lavaBlock : waterBlock);
 				}
 			}
 
-			private void TryGenerateSpring(World world, BlockCoord pos, BlockState block)
+			private void TryGenerateSpring(Dimension dim, BlockCoord pos, BlockState block)
 			{
-				if(CanGenerateSpring(world, pos))
+				if(CanGenerateSpring(dim, pos))
 				{
-					world.SetBlock(pos, block);
-					world.MarkForTickUpdate(pos);
+					dim.SetBlock(pos, block);
+					dim.MarkForTickUpdate(pos);
 				}
 			}
 
-			private bool CanGenerateSpring(World world, BlockCoord pos)
+			private bool CanGenerateSpring(Dimension dim, BlockCoord pos)
 			{
-				if (!world.IsDefaultBlock(pos)) return false;
+				if(!dim.IsDefaultBlock(pos)) return false;
 				int openSides = 0;
-				if (world.IsAirNotNull(pos.Left)) openSides++;
-				if (world.IsAirNotNull(pos.Right)) openSides++;
-				if (world.IsAirNotNull(pos.Back)) openSides++;
-				if (world.IsAirNotNull(pos.Forward)) openSides++;
+				if(dim.IsAirNotNull(pos.Left)) openSides++;
+				if(dim.IsAirNotNull(pos.Right)) openSides++;
+				if(dim.IsAirNotNull(pos.Back)) openSides++;
+				if(dim.IsAirNotNull(pos.Forward)) openSides++;
 				if(openSides >= 1 && openSides <= 2)
 				{
 					//Check for top and bottom
-					if (!world.IsAirOrNull(pos.Above) && !world.IsAirOrNull(pos.Below))
+					if(!dim.IsAirOrNull(pos.Above) && !dim.IsAirOrNull(pos.Below))
 					{
 						return true;
 					}
@@ -339,11 +334,11 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 			public List<Carver> carvers = new List<Carver>();
 
-			public override void ProcessBlockColumn(World world, Random random, BlockCoord pos, float mask)
+			public override void ProcessBlockColumn(Dimension dim, Random random, BlockCoord pos, float mask)
 			{
-				foreach (var c in carvers)
+				foreach(var c in carvers)
 				{
-					c.ProcessBlockColumn(world, pos, mask, random);
+					c.ProcessBlockColumn(dim, pos, mask, random);
 				}
 			}
 		}
@@ -378,14 +373,14 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		private Layer CreateCaveGenLayer(XElement elem)
 		{
 			CaveGenLayer layer = new CaveGenLayer();
-			foreach (var carverElem in elem.Elements())
+			foreach(var carverElem in elem.Elements())
 			{
 				string name = carverElem.Name.LocalName.ToLower();
-				if (name == "caves")
+				if(name == "caves")
 				{
 					layer.carvers.Add(new CaveCarver(carverElem));
 				}
-				else if (name == "caverns")
+				else if(name == "caverns")
 				{
 					layer.carvers.Add(new CavernCarver(carverElem));
 				}
@@ -398,16 +393,16 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 					throw new ArgumentException("Unknown carver type: " + name);
 				}
 			}
-			if (layer.carvers.Count == 0)
+			if(layer.carvers.Count == 0)
 			{
 				ConsoleOutput.WriteWarning($"The layer '{elem.Name.LocalName}' is defined but has no carvers added to it.");
 			}
 			return layer;
 		}
 
-		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
-			ProcessSplatmapLayersSurface(caveGenLayers, weightmap, world, pos, pass, mask);
+			ProcessSplatmapLayersSurface(caveGenLayers, weightmap, dim, pos, pass, mask);
 		}
 	}
 }

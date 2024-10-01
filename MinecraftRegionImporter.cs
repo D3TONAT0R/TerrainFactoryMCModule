@@ -1,17 +1,19 @@
-using TerrainFactory;
-using TerrainFactory.Import;
-using MCUtils;
-using System.Collections.Generic;
 using System.IO;
+using WorldForge;
 
-namespace TerrainFactory.Modules.MC {
-	public static class MinecraftRegionImporter {
+namespace TerrainFactory.Modules.MC
+{
+	public static class MinecraftRegionImporter
+	{
 
-		public static ElevationData ImportHeightmap(string filepath, HeightmapType type) {
+		public static ElevationData ImportHeightmap(string filepath, HeightmapType type)
+		{
 			short[,] hms = RegionLoader.GetHeightmap(filepath, type);
 			ElevationData data = new ElevationData(512, 512, filepath);
-			for(int x = 0; x < 512; x++) {
-				for(int z = 0; z < 512; z++) {
+			for(int x = 0; x < 512; x++)
+			{
+				for(int z = 0; z < 512; z++)
+				{
 					data.SetHeightAt(x, z, hms[x, 511 - z]);
 				}
 			}

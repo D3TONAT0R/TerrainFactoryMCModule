@@ -1,6 +1,4 @@
-﻿using MCUtils;
-using MCUtils.Coordinates;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Version = MCUtils.Version;
@@ -37,7 +35,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			rarityMul = float.Parse(xml.Element("multiplier")?.Value ?? "1");
 			var map = xml.Element("map");
 			weightmap = LoadWeightmapAndLayers(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ, layers, (xe) => CreateLayer(xe, context.desiredVersion));
-			if (weightmap == null)
+			if(weightmap == null)
 			{
 				Console.WriteLine($"Generating ores with default settings for version {context.desiredVersion}");
 				var gen = new OreGenLayer();
@@ -106,10 +104,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 		private Layer CreateLayer(XElement elem, Version gameVersion)
 		{
 			var layer = new OreGenLayer();
-			foreach (var oreElem in elem.Elements())
+			foreach(var oreElem in elem.Elements())
 			{
 				var elemName = oreElem.Name.LocalName.ToLower();
-				if (elemName == "gen")
+				if(elemName == "gen")
 				{
 					layer.ores.Add(new OreGenerator(oreElem));
 				}

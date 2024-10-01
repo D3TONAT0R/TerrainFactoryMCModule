@@ -1,9 +1,12 @@
-using MCUtils;
-using MCUtils.Coordinates;
+using netDxf.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using WorldForge;
+using WorldForge.Coordinates;
+using WorldForge.Regions;
+using Dimension = WorldForge.Dimension;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -54,13 +57,13 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			worldOriginOffsetX = offsetX;
 			worldOriginOffsetZ = offsetZ;
 			var maskElem = xml.Element("mask");
-			if (maskElem != null && rootPath != null)
+			if(maskElem != null && rootPath != null)
 			{
 				string maskPath = Path.Combine(rootPath, maskElem.Value);
 				var channelAttr = maskElem.Attribute("channel");
 				ColorChannel channel;
 				string attr = channelAttr?.Value.ToLower();
-				switch (attr)
+				switch(attr)
 				{
 					case "r":
 					case "red": channel = ColorChannel.Red; break;
@@ -78,32 +81,32 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		protected Weightmap<float> LoadWeightmapAndLayers(string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ, Dictionary<int, Layer> layers, Func<XElement, Layer> createLayerAction)
 		{
-			if (layers == null) layers = new Dictionary<int, Layer>();
+			if(layers == null) layers = new Dictionary<int, Layer>();
 			var map = xml.Element("weightmap");
-			if (map != null)
+			if(map != null)
 			{
 				string mapFileName = Path.Combine(rootPath, map.Attribute("file").Value);
 				var weightmap = Weightmap<float>.CreateRGBAMap(mapFileName, offsetX, offsetZ, sizeX, sizeZ);
-				foreach (var elem in map.Elements())
+				foreach(var elem in map.Elements())
 				{
 					string name = elem.Name.LocalName.ToLower();
-					if (name == "r" || name == "red")
+					if(name == "r" || name == "red")
 					{
 						RegisterLayer(0, layers, createLayerAction, elem);
 					}
-					else if (name == "g" || name == "green")
+					else if(name == "g" || name == "green")
 					{
 						RegisterLayer(1, layers, createLayerAction, elem);
 					}
-					else if (name == "b" || name == "blue")
+					else if(name == "b" || name == "blue")
 					{
 						RegisterLayer(2, layers, createLayerAction, elem);
 					}
-					else if (name == "a" || name == "alpha")
+					else if(name == "a" || name == "alpha")
 					{
 						RegisterLayer(3, layers, createLayerAction, elem);
 					}
-					else if (name == "n" || name == "none")
+					else if(name == "n" || name == "none")
 					{
 						RegisterLayer(-1, layers, createLayerAction, elem);
 					}
@@ -125,51 +128,51 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			layers.Add(maskChannelIndex, createLayerAction(elem));
 		}
 
-		public void ProcessBlock(World world, BlockCoord pos, int pass)
+		public void ProcessBlock(Dimension dim, BlockCoord pos, int pass)
 		{
 			float maskValue = mask != null ? mask.GetValue(pos.x - worldOriginOffsetX, pos.z - worldOriginOffsetZ) : 1;
-			if (maskValue > 0)
+			if(maskValue > 0)
 			{
-				OnProcessBlock(world, pos, pass, maskValue);
+				OnProcessBlock(dim, pos, pass, maskValue);
 			}
 		}
 
-		public void ProcessSurface(World world, BlockCoord pos, int pass)
+		public void ProcessSurface(Dimension dim, BlockCoord pos, int pass)
 		{
 			float maskValue = mask != null ? mask.GetValue(pos.x - worldOriginOffsetX, pos.z - worldOriginOffsetZ) : 1;
-			if (maskValue > 0)
+			if(maskValue > 0)
 			{
-				OnProcessSurface(world, pos, pass, maskValue);
+				OnProcessSurface(dim, pos, pass, maskValue);
 			}
 		}
 
-		protected void ProcessSplatmapLayersSurface(Dictionary<int, Layer> layers, Weightmap<float> weightmap, World world, BlockCoord pos, int pass, float mask)
+		protected void ProcessSplatmapLayersSurface(Dictionary<int, Layer> layers, Weightmap<float> weightmap, Dimension dim, BlockCoord pos, int pass, float mask)
 		{
-			foreach (var l in layers)
+			foreach(var l in layers)
 			{
 				float layerMask = mask;
-				if (l.Key > -1)
+				if(l.Key > -1)
 				{
 					layerMask *= weightmap.GetValue(pos.x, pos.z, l.Key);
 				}
-				if (layerMask > 0.001f)
+				if(layerMask > 0.001f)
 				{
-					l.Value.ProcessBlockColumn(world, random, pos, layerMask);
+					l.Value.ProcessBlockColumn(dim, random, pos, layerMask);
 				}
 			}
 		}
 
-		protected virtual void OnProcessBlock(World world, BlockCoord pos, int pass, float mask)
+		protected virtual void OnProcessBlock(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
 
 		}
 
-		protected virtual void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
+		protected virtual void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
 
 		}
 
-		public virtual void ProcessRegion(World world, Region reg, int rx, int rz, int pass)
+		public virtual void ProcessRegion(Dimension dim, Region reg, int rx, int rz, int pass)
 		{
 
 		}
@@ -181,7 +184,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		public virtual void OnCreateWorldFiles(string worldFolder)
 		{
-			
+
 		}
 	}
 }

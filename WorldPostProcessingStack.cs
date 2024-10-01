@@ -1,17 +1,10 @@
-using TerrainFactory;
-using TerrainFactory.Export;
-using TerrainFactory.Import;
-using TerrainFactory.Modules.Images;
-using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
-using MCUtils;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -51,20 +44,20 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		{
 			try
 			{
-				foreach (var schematicsContainer in xmlRootElement.Descendants("schematics"))
+				foreach(var schematicsContainer in xmlRootElement.Descendants("schematics"))
 				{
-					foreach (var elem in schematicsContainer.Elements())
+					foreach(var elem in schematicsContainer.Elements())
 					{
 						RegisterStructure(Path.Combine(rootFolder, elem.Value), elem.Name.LocalName);
 					}
 				}
 
-				foreach (var splatXml in xmlRootElement.Element("postprocess").Elements())
+				foreach(var splatXml in xmlRootElement.Element("postprocess").Elements())
 				{
 					LoadGenerator(splatXml, false, rootFolder, ditherLimit, offsetX, offsetZ, sizeX, sizeZ);
 				}
 			}
-			catch (Exception e)
+			catch(Exception e)
 			{
 				ConsoleOutput.WriteError("Error occured while loading settings for splatmapper:");
 				ConsoleOutput.WriteError(e.Message);
@@ -74,64 +67,64 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		void LoadGenerator(XElement splatXml, bool fromInclude, string rootPath, int ditherLimit, int offsetX, int offsetZ, int sizeX, int sizeZ)
 		{
 			var name = splatXml.Name.LocalName.ToLower();
-			if (name == "splat")
+			if(name == "splat")
 			{
 				generators.Add(new SplatmappedTerrainPostProcessor(context, splatXml, rootPath, ditherLimit, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "water")
+			else if(name == "water")
 			{
 				generators.Add(new WaterLevelPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "merger")
+			else if(name == "merger")
 			{
 				generators.Add(new WorldMergerPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "ores")
+			else if(name == "ores")
 			{
 				generators.Add(new OreGenPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "snow")
+			else if(name == "snow")
 			{
 				generators.Add(new SnowPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "deice")
+			else if(name == "deice")
 			{
 				generators.Add(new ThawingPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "naturalize")
+			else if(name == "naturalize")
 			{
 				generators.Add(new NaturalTerrainPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "vegetation")
+			else if(name == "vegetation")
 			{
 				generators.Add(new VegetationPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "torches")
+			else if(name == "torches")
 			{
 				generators.Add(new RandomTorchPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "caves")
+			else if(name == "caves")
 			{
 				generators.Add(new CavesPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "bedrock")
+			else if(name == "bedrock")
 			{
 				generators.Add(new BedrockPostProcessor(context, rootPath, splatXml, offsetX, offsetZ, sizeX, sizeZ));
 			}
-			else if (name == "analysis")
+			else if(name == "analysis")
 			{
 				generators.Add(new BlockDistributionAnalysisPostProcessor(context, splatXml));
 			}
-			else if (name == "include")
+			else if(name == "include")
 			{
-				if (fromInclude)
+				if(fromInclude)
 				{
 					ConsoleOutput.WriteError("Recursive includes are not allowed");
 					return;
 				}
 				//Include external xml
 				var includePathElem = splatXml.Attribute("file");
-				if (includePathElem == null)
+				if(includePathElem == null)
 				{
 					throw new KeyNotFoundException("The include's file must be specified with a 'file' attribute");
 				}
@@ -139,11 +132,11 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 				var include = XDocument.Parse(File.ReadAllText(includePath)).Root;
 
-				foreach (var elem in include.Elements())
+				foreach(var elem in include.Elements())
 				{
-					if (elem.Name == "schematics")
+					if(elem.Name == "schematics")
 					{
-						foreach (var se in elem.Elements())
+						foreach(var se in elem.Elements())
 						{
 							RegisterStructure(Path.Combine(rootPath, se.Value), se.Name.LocalName);
 						}
@@ -162,9 +155,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		public bool ContinsGeneratorOfType(Type type)
 		{
-			foreach (var g in generators)
+			foreach(var g in generators)
 			{
-				if (g.GetType() == type)
+				if(g.GetType() == type)
 				{
 					return true;
 				}
@@ -189,19 +182,19 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		{
 
 			int processorIndex = 0;
-			foreach (var post in generators)
+			foreach(var post in generators)
 			{
-				for (int pass = 0; pass < post.NumberOfPasses; pass++)
+				for(int pass = 0; pass < post.NumberOfPasses; pass++)
 				{
 					string name = post.GetType().Name;
-					if (post.PostProcessorType == PostProcessType.Block || post.PostProcessorType == PostProcessType.Both)
+					if(post.PostProcessorType == PostProcessType.Block || post.PostProcessorType == PostProcessType.Both)
 					{
 						//Iterate the postprocessors over every block
-						for (int x = 0; x < exporter.heightmapLengthX; x++)
+						for(int x = 0; x < exporter.heightmapLengthX; x++)
 						{
-							for (int z = 0; z < exporter.heightmapLengthZ; z++)
+							for(int z = 0; z < exporter.heightmapLengthZ; z++)
 							{
-								for (int y = post.BlockProcessYMin; y <= post.BlockProcessYMax; y++)
+								for(int y = post.BlockProcessYMin; y <= post.BlockProcessYMax; y++)
 								{
 									post.ProcessBlock(exporter.world, (x + exporter.regionOffsetX * 512, y, z + exporter.regionOffsetZ * 512), pass);
 								}
@@ -210,12 +203,12 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 						}
 					}
 
-					if (post.PostProcessorType == PostProcessType.Surface || post.PostProcessorType == PostProcessType.Both)
+					if(post.PostProcessorType == PostProcessType.Surface || post.PostProcessorType == PostProcessType.Both)
 					{
 						//Iterate the postprocessors over every surface block
-						for (int x = 0; x < exporter.heightmapLengthX; x++)
+						for(int x = 0; x < exporter.heightmapLengthX; x++)
 						{
-							for (int z = 0; z < exporter.heightmapLengthZ; z++)
+							for(int z = 0; z < exporter.heightmapLengthZ; z++)
 							{
 								post.ProcessSurface(exporter.world, (x + exporter.regionOffsetX * 512, exporter.heightmap[x, z], z + exporter.regionOffsetZ * 512), pass);
 							}
@@ -231,7 +224,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 				}
 				processorIndex++;
 			}
-			foreach (var post in generators)
+			foreach(var post in generators)
 			{
 				post.OnFinish(exporter.world);
 			}

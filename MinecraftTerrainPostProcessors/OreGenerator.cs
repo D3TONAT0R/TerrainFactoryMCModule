@@ -1,8 +1,8 @@
-﻿using TerrainFactory.Util;
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
+﻿using System;
 using System.Xml.Linq;
+using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -18,8 +18,8 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		public float heightFalloff = 0f;
 		public float heightFalloffCenter = 16;
 
-		private static ProtoBlock stone;
-		private static ProtoBlock deepslate;
+		private static BlockID stone;
+		private static BlockID deepslate;
 
 		public float SpawnsPerChunk
 		{
@@ -50,7 +50,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		}
 
-		public OreGenerator (XElement elem)
+		public OreGenerator(XElement elem)
 		{
 			block = new BlockState(BlockList.Find(elem.Element("block").Value));
 			elem.TryParseInt("size", ref veinSizeMax);
@@ -63,7 +63,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			elem.TryParseFloat("center", ref heightFalloffCenter);
 		}
 
-		public void Generate(World world, Random random, float spawnChanceMul, int x, int z)
+		public void Generate(Dimension dim, Random random, float spawnChanceMul, int x, int z)
 		{
 			if(heightMin >= heightMax) return;
 			if(Chance(random, spawnsPerColumn * spawnChanceMul))
@@ -78,13 +78,13 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 						int y1 = y + RandomRange(random, -span, span);
 						int z1 = z + RandomRange(random, -span, span);
 						var pos = new BlockCoord(x1, y1, z1);
-						if(world.GetBlock(pos) == stone)
+						if(dim.GetBlock(pos) == stone)
 						{
-							world.SetBlock(pos, block);
+							dim.SetBlock(pos, block);
 						}
-						else if(deepslateBlockVariant != null && world.GetBlock(pos) == deepslate)
+						else if(deepslateBlockVariant != null && dim.GetBlock(pos) == deepslate)
 						{
-							world.SetBlock(pos, deepslateBlockVariant);
+							dim.SetBlock(pos, deepslateBlockVariant);
 						}
 					}
 				}

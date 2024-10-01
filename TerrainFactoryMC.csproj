@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Authors></Authors>
     <Company></Company>
     <Description></Description>
@@ -23,12 +23,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\NoiseGenerator\NoiseGenerator.csproj" />
+    <PackageReference Include="NoiseGenerator" Version="0.1.0" />
+    <PackageReference Include="WorldForge" Version="0.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TerrainFactoryBitmaps\TerrainFactoryBitmaps.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
-    <ProjectReference Include="..\..\MCUtils\MCUtils.csproj" />
     <ProjectReference Include="..\TerrainFactory\TerrainFactory.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>

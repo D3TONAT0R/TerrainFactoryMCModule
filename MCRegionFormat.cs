@@ -1,10 +1,6 @@
-﻿using TerrainFactory;
-using TerrainFactory.Export;
+﻿using TerrainFactory.Export;
 using TerrainFactory.Formats;
 using TerrainFactory.Util;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -25,7 +21,7 @@ namespace TerrainFactory.Modules.MC
 
 		protected override bool ExportFile(string path, ExportTask task)
 		{
-			using (var stream = BeginWriteStream(path))
+			using(var stream = BeginWriteStream(path))
 			{
 				new MCWorldExporter(task, true, true).WriteFile(path, stream, this);
 			}
@@ -41,7 +37,7 @@ namespace TerrainFactory.Modules.MC
 		public override bool ValidateSettings(ExportSettings settings, ElevationData data)
 		{
 			bool sourceIs512 = (data.CellCountY == 512 && data.CellCountX == 512);
-			if (settings.splitInterval != 512 && !sourceIs512)
+			if(settings.splitInterval != 512 && !sourceIs512)
 			{
 				ConsoleOutput.WriteError("File splitting dimensions must be 512 when exporting to minecraft regions!");
 				return false;

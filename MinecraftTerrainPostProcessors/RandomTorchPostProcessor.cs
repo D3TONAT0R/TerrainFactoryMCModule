@@ -1,10 +1,11 @@
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
 using System.Xml.Linq;
+using WorldForge;
+using WorldForge.Coordinates;
 
-namespace TerrainFactory.Modules.MC.PostProcessors {
-	public class RandomTorchPostProcessor : AbstractPostProcessor {
+namespace TerrainFactory.Modules.MC.PostProcessors
+{
+	public class RandomTorchPostProcessor : AbstractPostProcessor
+	{
 
 		public float chance;
 
@@ -17,9 +18,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors {
 			chance = float.Parse(xml.Element("amount")?.Value ?? "0.02");
 		}
 
-		protected override void OnProcessSurface(MCUtils.World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
-			if(random.NextDouble() <= chance && world.IsAirOrNull(pos.Above)) world.SetBlock((pos.Above), "minecraft:torch");
+			if(random.NextDouble() <= chance && dim.IsAirOrNull(pos.Above)) dim.SetBlock((pos.Above), "minecraft:torch");
 		}
 	}
 }

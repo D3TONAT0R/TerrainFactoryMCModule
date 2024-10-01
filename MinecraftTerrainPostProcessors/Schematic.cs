@@ -1,9 +1,8 @@
-﻿using TerrainFactory;
-using MCUtils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using WorldForge;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -36,34 +35,34 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			LoadFromFile(filepath);
 		}
 
-		public bool Build(World world, int x, int y, int z, Random r)
+		public bool Build(Dimension dim, int x, int y, int z, Random r)
 		{
 			byte h = (byte)r.Next(trunkHeightMin, trunkHeightMax + 1);
-			if (IsObstructed(world, x, y + h, z))
+			if(IsObstructed(dim, x, y + h, z))
 			{
 				return false;
 			}
-			if (!string.IsNullOrWhiteSpace(trunkBlock) && trunkHeightMax > 0)
+			if(!string.IsNullOrWhiteSpace(trunkBlock) && trunkHeightMax > 0)
 			{
-				for (int i = 0; i < h; i++)
+				for(int i = 0; i < h; i++)
 				{
-					world.SetBlock((x, y + i, z), trunkBlock);
+					dim.SetBlock((x, y + i, z), trunkBlock);
 				}
 			}
 			int xm = x - (int)Math.Floor((float)StructureSizeX / 2);
 			int zm = z - (int)Math.Floor((float)StructureSizeZ / 2);
-			for (int x1 = 0; x1 < StructureSizeX; x1++)
+			for(int x1 = 0; x1 < StructureSizeX; x1++)
 			{
-				for (int y1 = 0; y1 < StructureSizeY; y1++)
+				for(int y1 = 0; y1 < StructureSizeY; y1++)
 				{
-					for (int z1 = 0; z1 < StructureSizeZ; z1++)
+					for(int z1 = 0; z1 < StructureSizeZ; z1++)
 					{
 						var d = schematic[x1, y1, z1];
-						if (d == 0) continue;
+						if(d == 0) continue;
 						var (block, prob) = blocks[d];
-						if (r.NextDouble() < prob)
+						if(r.NextDouble() < prob)
 						{
-							world.SetBlock((xm + x1, y + h + y1, zm + z1), block);
+							dim.SetBlock((xm + x1, y + h + y1, zm + z1), block);
 						}
 					}
 				}
@@ -71,7 +70,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			return true;
 		}
 
-		private bool IsObstructed(MCUtils.World world, int lx, int ly, int lz)
+		private bool IsObstructed(Dimension dim, int lx, int ly, int lz)
 		{
 			int x1 = lx - (int)Math.Floor(StructureSizeX / 2f);
 			int x2 = lx + (int)Math.Ceiling(StructureSizeX / 2f);
@@ -80,16 +79,16 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			int z1 = lz - (int)Math.Floor(StructureSizeZ / 2f);
 			int z2 = lz + (int)Math.Ceiling(StructureSizeZ / 2f);
 			int sy = 0;
-			for (int y = y1; y < y2; y++)
+			for(int y = y1; y < y2; y++)
 			{
 				int sz = 0;
-				for (int z = z1; z < z2; z++)
+				for(int z = z1; z < z2; z++)
 				{
 					int sx = 0;
-					for (int x = x1; x < x2; x++)
+					for(int x = x1; x < x2; x++)
 					{
-						if (schematic[sx, sy, sz] == 0) continue; //Do not check this block if the result is nothing anyway
-						if (!world.IsAirOrNull((x, y, z)) || world.GetRegion(x, z) == null) return true;
+						if(schematic[sx, sy, sz] == 0) continue; //Do not check this block if the result is nothing anyway
+						if(!dim.IsAirOrNull((x, y, z)) || dim.GetRegion(x, z) == null) return true;
 						sx++;
 					}
 					sz++;
@@ -103,15 +102,15 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		{
 			XElement root = XDocument.Parse(File.ReadAllText(xmlPath)).Root;
 			var type = root.Element("type")?.Value ?? null;
-			if (type == null)
+			if(type == null)
 			{
 				throw new ArgumentNullException($"The schematic {Path.GetFileName(xmlPath)} does not specify it's type");
 			}
 			ParseCommonData(root);
-			if (type == "tree")
+			if(type == "tree")
 			{
 				var trunkElem = root.Element("trunk");
-				if (trunkElem != null)
+				if(trunkElem != null)
 				{
 					trunkBlock = ParseBlock(trunkElem.Element("block").Value);
 					trunkHeightMin = byte.Parse(trunkElem.Element("height_min")?.Value ?? "1");
@@ -138,9 +137,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			schematic = new byte[sx, sy, sz];
 
 			blocks.Clear();
-			foreach (var elem in root.Element("blocks").Elements())
+			foreach(var elem in root.Element("blocks").Elements())
 			{
-				if (elem.Name == "block")
+				if(elem.Name == "block")
 				{
 					byte id = byte.Parse(elem.Attribute("id").Value);
 					float chance = float.Parse(elem.Attribute("chance")?.Value ?? "1");
@@ -155,7 +154,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		private void ParseBlockArray(XElement array)
 		{
 			int y = 0;
-			foreach (var plane in array.Elements())
+			foreach(var plane in array.Elements())
 			{
 				ParseBlockPlane(plane.Value, y);
 				y++;
@@ -166,12 +165,12 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		{
 			string[] rows = plane.Split('\n');
 			int i = 0;
-			foreach (string r in rows)
+			foreach(string r in rows)
 			{
-				if (string.IsNullOrWhiteSpace(r)) continue;
+				if(string.IsNullOrWhiteSpace(r)) continue;
 				int z = StructureSizeZ - i - 1;
 				string[] split = r.Split(',');
-				for (int x = 0; x < split.Length; x++)
+				for(int x = 0; x < split.Length; x++)
 				{
 					schematic[x, y, z] = byte.Parse(split[x]);
 				}
@@ -181,7 +180,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		private string ParseBlock(string s)
 		{
-			if (s.StartsWith("#"))
+			if(s.StartsWith("#"))
 			{
 				s = s.Substring(1, s.Length - 1);
 				return blocks[byte.Parse(s)].block;

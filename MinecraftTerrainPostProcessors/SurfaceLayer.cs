@@ -1,14 +1,12 @@
-﻿using TerrainFactory;
-using TerrainFactory.Util;
-using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
-using MCUtils;
-using MCUtils.Coordinates;
-using NoiseGenerator;
+﻿using NoiseGenerator;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using System.Xml.Linq;
+using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Biomes;
+using WorldForge.Coordinates;
+using Color = System.Drawing.Color;
 
 namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
@@ -18,13 +16,13 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 		public int yMin = int.MinValue;
 		public int yMax = int.MaxValue;
 
-		public abstract bool Generate(World w, BlockCoord pos);
+		public abstract bool Generate(Dimension dim, BlockCoord pos);
 
-		protected bool SetBlock(World w, BlockCoord pos, string b)
+		protected bool SetBlock(Dimension dim, BlockCoord pos, string b)
 		{
-			if (!string.IsNullOrWhiteSpace(b) && !w.IsAirOrNull(pos))
+			if(!string.IsNullOrWhiteSpace(b) && !dim.IsAirOrNull(pos))
 			{
-				return w.SetBlock(pos, b);
+				return dim.SetBlock(pos, b);
 			}
 			else
 			{
@@ -47,16 +45,16 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 
 		}
 
-		public override bool Generate(World w, BlockCoord pos)
+		public override bool Generate(Dimension dim, BlockCoord pos)
 		{
-			if (pos.y < yMin || pos.y > yMax)
+			if(pos.y < yMin || pos.y > yMax)
 			{
 				return false;
 			}
 			bool b = false;
-			for (int i = 0; i < blocks.Count; i++)
+			for(int i = 0; i < blocks.Count; i++)
 			{
-				b |= SetBlock(w, (pos.x, pos.y - i, pos.z), blocks[i]);
+				b |= SetBlock(dim, (pos.x, pos.y - i, pos.z), blocks[i]);
 			}
 			return b;
 		}
@@ -75,11 +73,11 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			perlinThreshold = threshold;
 		}
 
-		public override bool Generate(World w, BlockCoord pos)
+		public override bool Generate(Dimension dim, BlockCoord pos)
 		{
-			if (perlinGen.GetPerlinAtCoord(pos.x, pos.z) < perlinThreshold)
+			if(perlinGen.GetPerlinAtCoord(pos.x, pos.z) < perlinThreshold)
 			{
-				return base.Generate(w, pos);
+				return base.Generate(dim, pos);
 			}
 			else
 			{
@@ -112,20 +110,20 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			isPlant = doPlantCheck;
 		}
 
-		public override bool Generate(World world, BlockCoord pos)
+		public override bool Generate(Dimension dim, BlockCoord pos)
 		{
-			if (isPlant && (!Blocks.IsPlantSustaining(world.GetBlock(pos)) || !world.IsAirOrNull(pos.Above))) return false;
-			if (pos.y < yMin || pos.y > yMax) return false;
+			if(isPlant && (!Blocks.IsPlantSustaining(dim.GetBlock(pos)) || !dim.IsAirOrNull(pos.Above))) return false;
+			if(pos.y < yMin || pos.y > yMax) return false;
 
-			if (random.NextDouble() < chance / 128f)
+			if(random.NextDouble() < chance / 128f)
 			{
-				if (schematic != null)
+				if(schematic != null)
 				{
-					return schematic.Build(world, pos.x, pos.y + 1, pos.z, random);
+					return schematic.Build(dim, pos.x, pos.y + 1, pos.z, random);
 				}
 				else
 				{
-					return world.SetBlock(pos.Above, block);
+					return dim.SetBlock(pos.Above, block);
 				}
 			}
 			else
@@ -144,10 +142,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			biomeID = biome;
 		}
 
-		public override bool Generate(World w, BlockCoord pos)
+		public override bool Generate(Dimension dim, BlockCoord pos)
 		{
-			if (pos.y < yMin || pos.y > yMax) return false;
-			w.SetBiome(pos.x, pos.z, biomeID);
+			if(pos.y < yMin || pos.y > yMax) return false;
+			dim.SetBiome(pos.x, pos.z, biomeID);
 			return true;
 		}
 	}
@@ -171,24 +169,24 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			string type = xml.Attribute("type")?.Value ?? "standard";
 			string[] blocks = xml.Attribute("blocks").Value.Split(',');
 			SurfaceLayerGenerator gen = null;
-			if (type == "standard" || string.IsNullOrWhiteSpace(type))
+			if(type == "standard" || string.IsNullOrWhiteSpace(type))
 			{
 				gen = new StandardSurfaceLayerGenerator(blocks);
 			}
-			else if (type == "perlin")
+			else if(type == "perlin")
 			{
 				float scale = float.Parse(xml.Attribute("scale")?.Value ?? "1.0");
 				float threshold = float.Parse(xml.Attribute("threshold")?.Value ?? "0.5");
 				gen = new PerlinSurfaceLayerGenerator(blocks, scale, threshold);
 			}
 
-			if (gen != null)
+			if(gen != null)
 			{
 				if(xml.Attribute("y-min") != null)
 				{
 					gen.yMin = int.Parse(xml.Attribute("y-min").Value);
 				}
-				if (xml.Attribute("y-max") != null)
+				if(xml.Attribute("y-max") != null)
 				{
 					gen.yMax = int.Parse(xml.Attribute("y-max").Value);
 				}
@@ -209,7 +207,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			xml.TryParseFloatAttribute("amount", ref amount);
 			bool plantCheck = true;
 			xml.TryParseBoolAttribute("plant-check", ref plantCheck);
-			if (schem != null)
+			if(schem != null)
 			{
 				generators.Add(new SchematicInstanceGenerator(gen.context.postProcessor.schematics[schem.Value], amount, plantCheck));
 				return true;
@@ -217,7 +215,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			else
 			{
 				var block = xml.Attribute("block");
-				if (block != null)
+				if(block != null)
 				{
 					generators.Add(new SchematicInstanceGenerator(block.Value, amount, plantCheck));
 					return true;
@@ -233,12 +231,13 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 		public bool AddBiomeGenerator(XElement xml)
 		{
 			var id = xml.Attribute("id");
-			if (id != null && id.Value.Length > 0)
+			if(id != null && id.Value.Length > 0)
 			{
 				if(char.IsDigit(id.Value[0]))
 				{
 					generators.Add(new BiomeGenerator((BiomeID)byte.Parse(id.Value)));
-				} else
+				}
+				else
 				{
 					generators.Add(new BiomeGenerator((BiomeID)Enum.Parse(typeof(BiomeID), id.Value)));
 				}
@@ -251,11 +250,11 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			}
 		}
 
-		public void RunGenerator(World w, BlockCoord pos)
+		public void RunGenerator(Dimension dim, BlockCoord pos)
 		{
-			for (int i = 0; i < generators.Count; i++)
+			for(int i = 0; i < generators.Count; i++)
 			{
-				generators[i].Generate(w, pos);
+				generators[i].Generate(dim, pos);
 			}
 		}
 	}

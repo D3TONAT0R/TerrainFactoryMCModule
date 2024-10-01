@@ -1,12 +1,9 @@
-using TerrainFactory;
-using TerrainFactory.Util;
-using TerrainFactory.Modules.Images;
-using MCUtils;
-using MCUtils.Coordinates;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Xml.Linq;
+using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Biomes;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
@@ -59,33 +56,33 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			iceBlock = new BlockState(BlockList.Find("ice"));
 
 			snowyGrass = new BlockState(BlockList.Find("grass_block"));
-			snowyGrass.properties.Add("snowy", true);
+			snowyGrass.SetProperty("snowy", true);
 			snowyPodzol = new BlockState(BlockList.Find("podzol"));
-			snowyPodzol.properties.Add("snowy", true);
+			snowyPodzol.SetProperty("snowy", true);
 			snowyMycelium = new BlockState(BlockList.Find("mycelium"));
-			snowyMycelium.properties.Add("snowy", true);
+			snowyMycelium.SetProperty("snowy", true);
 		}
 
-		protected override void OnProcessSurface(World world, BlockCoord pos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
-			var biome = world.GetBiome(pos);
-			if (biome.HasValue)
+			var biome = dim.GetBiome(pos);
+			if(biome.HasValue)
 			{
-				if (!topOnly)
+				if(!topOnly)
 				{
-					FreezeBlock(world, pos, mask, biome.Value);
+					FreezeBlock(dim, pos, mask, biome.Value);
 				}
-				int y2 = world.GetHighestBlock(pos.x, pos.z, HeightmapType.SolidBlocks);
-				if (topOnly || y2 > pos.y)
+				int y2 = dim.GetHighestBlock(pos.x, pos.z, HeightmapType.SolidBlocks);
+				if(topOnly || y2 > pos.y)
 				{
-					FreezeBlock(world, (pos.x, y2, pos.z), mask, biome.Value);
+					FreezeBlock(dim, (pos.x, y2, pos.z), mask, biome.Value);
 				}
 			}
 		}
 
 		private bool IsAboveBiomeThreshold(BiomeID biome, int y)
 		{
-			if (snowThresholds.TryGetValue(biome, out short threshold))
+			if(snowThresholds.TryGetValue(biome, out short threshold))
 			{
 				return y >= threshold;
 			}
@@ -96,39 +93,39 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			}
 		}
 
-		private void FreezeBlock(World world, BlockCoord pos, float mask, BiomeID? biome, bool airCheck = true)
+		private void FreezeBlock(Dimension dim, BlockCoord pos, float mask, BiomeID? biome, bool airCheck = true)
 		{
-			if (biome.HasValue && !IsAboveBiomeThreshold(biome.Value, pos.y)) return;
-			bool canFreeze = !airCheck || world.IsAirOrNull(pos.Above);
-			if (!canFreeze) return;
-			var block = world.GetBlock(pos);
-			if (block.IsWater)
+			if(biome.HasValue && !IsAboveBiomeThreshold(biome.Value, pos.y)) return;
+			bool canFreeze = !airCheck || dim.IsAirOrNull(pos.Above);
+			if(!canFreeze) return;
+			var block = dim.GetBlock(pos);
+			if(block.IsWater)
 			{
 				//100% ice coverage above mask values of 0.25f
-				if (mask >= 1 || random.NextDouble() <= mask * 4f)
+				if(mask >= 1 || random.NextDouble() <= mask * 4f)
 				{
-					world.SetBlock(pos, iceBlock);
+					dim.SetBlock(pos, iceBlock);
 				}
 			}
 			else
 			{
 				//if (mask >= 1 || random.NextDouble() <= mask)
 				//{
-					if (block.IsLiquid || block.CompareMultiple("minecraft:snow", "minecraft:ice")) return;
-					world.SetBlock(pos.Above, snowLayerBlock);
-					//Add "snowy" tag on blocks that support it.
-					if (block.Compare(snowyGrass.block.ID))
-					{
-						world.SetBlock(pos, snowyGrass);
-					}
-					else if (block.Compare(snowyPodzol.block.ID))
-					{
-						world.SetBlock(pos, snowyPodzol);
-					}
-					else if (block.Compare(snowyMycelium.block.ID))
-					{
-						world.SetBlock(pos, snowyMycelium);
-					}
+				if(block.IsLiquid || block.CompareMultiple("minecraft:snow", "minecraft:ice")) return;
+				dim.SetBlock(pos.Above, snowLayerBlock);
+				//Add "snowy" tag on blocks that support it.
+				if(block.Compare(snowyGrass.block.ID))
+				{
+					dim.SetBlock(pos, snowyGrass);
+				}
+				else if(block.Compare(snowyPodzol.block.ID))
+				{
+					dim.SetBlock(pos, snowyPodzol);
+				}
+				else if(block.Compare(snowyMycelium.block.ID))
+				{
+					dim.SetBlock(pos, snowyMycelium);
+				}
 				//}
 			}
 		}
