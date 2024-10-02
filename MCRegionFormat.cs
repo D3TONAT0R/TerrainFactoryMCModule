@@ -1,6 +1,7 @@
 ﻿using TerrainFactory.Export;
 using TerrainFactory.Formats;
 using TerrainFactory.Util;
+using WorldForge;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -16,7 +17,7 @@ namespace TerrainFactory.Modules.MC
 		protected override ElevationData ImportFile(string importPath, params string[] args)
 		{
 			//TODO: control heightmap type with args
-			return MinecraftRegionImporter.ImportHeightmap(importPath, MCUtils.HeightmapType.TerrainBlocksNoLiquid);
+			return MinecraftRegionImporter.ImportHeightmap(importPath, HeightmapType.TerrainBlocksNoLiquid);
 		}
 
 		protected override bool ExportFile(string path, ExportTask task)

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Xml.Linq;
 using TerrainFactory.Util;
+using WorldForge;
+using WorldForge.Regions;
+using WorldForge.Utilities.BlockDistributionAnalysis;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -22,10 +25,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			int targetFlagsInt = (int)(AnalysisEvaluator.TargetBlockTypes.Ores | AnalysisEvaluator.TargetBlockTypes.AirAndLiquids);
 			xml.TryParseInt("types", ref targetFlagsInt);
 			targetFlags = (AnalysisEvaluator.TargetBlockTypes)targetFlagsInt;
-			analysis = new Analyzer((short)yMin, (short)yMax);
+			analysis = new Analyzer(yMin, yMax);
 		}
 
-		public override void ProcessRegion(World world, Region reg, int rx, int rz, int pass)
+		public override void ProcessRegion(Dimension dim, Region reg, int rx, int rz, int pass)
 		{
 			analysis.AnalyzeRegion(reg);
 		}

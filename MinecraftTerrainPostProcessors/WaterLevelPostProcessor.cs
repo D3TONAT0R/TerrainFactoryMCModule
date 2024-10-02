@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Xml.Linq;
-using TerrainFactory.Modules.Images;
+using TerrainFactory.Modules.Bitmaps;
 using TerrainFactory.Util;
 using WorldForge;
 using WorldForge.Coordinates;

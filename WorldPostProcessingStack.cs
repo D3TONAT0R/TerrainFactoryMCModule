@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
+using WorldForge.Regions;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -196,7 +197,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 							{
 								for(int y = post.BlockProcessYMin; y <= post.BlockProcessYMax; y++)
 								{
-									post.ProcessBlock(exporter.world, (x + exporter.regionOffsetX * 512, y, z + exporter.regionOffsetZ * 512), pass);
+									post.ProcessBlock(exporter.Dimension, (x + exporter.regionOffsetX * 512, y, z + exporter.regionOffsetZ * 512), pass);
 								}
 							}
 							UpdateProgressBar(processorIndex, "Decorating terrain", name, (x + 1) / (float)exporter.heightmapLengthX, pass, post.NumberOfPasses);
@@ -210,16 +211,16 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 						{
 							for(int z = 0; z < exporter.heightmapLengthZ; z++)
 							{
-								post.ProcessSurface(exporter.world, (x + exporter.regionOffsetX * 512, exporter.heightmap[x, z], z + exporter.regionOffsetZ * 512), pass);
+								post.ProcessSurface(exporter.Dimension, (x + exporter.regionOffsetX * 512, exporter.heightmap[x, z], z + exporter.regionOffsetZ * 512), pass);
 							}
 							UpdateProgressBar(processorIndex, "Decorating surface", name, (x + 1) / (float)exporter.heightmapLengthX, pass, post.NumberOfPasses);
 						}
 					}
 
 					//Run every postprocessor once for every region (rarely used)
-					Parallel.ForEach(exporter.world.regions.Values, (MCUtils.Region reg) =>
+					Parallel.ForEach(exporter.Dimension.regions.Values, reg =>
 					{
-						post.ProcessRegion(exporter.world, reg, reg.regionPos.x, reg.regionPos.z, pass);
+						post.ProcessRegion(exporter.Dimension, reg, reg.regionPos.x, reg.regionPos.z, pass);
 					});
 				}
 				processorIndex++;

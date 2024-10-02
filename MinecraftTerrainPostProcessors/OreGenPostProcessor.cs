@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Version = MCUtils.Version;
+using WorldForge;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 {
@@ -13,12 +14,12 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			public List<OreGenerator> ores = new List<OreGenerator>();
 			public float multiplier = 1;
 
-			public override void ProcessBlockColumn(World world, Random random, BlockCoord topPos, float mask)
+			public override void ProcessBlockColumn(Dimension dim, Random random, BlockCoord topPos, float mask)
 			{
 				foreach(var ore in ores)
 				{
 					float spawnChanceMul = multiplier * mask;
-					ore.Generate(world, random, spawnChanceMul, topPos.x, topPos.z);
+					ore.Generate(dim, random, spawnChanceMul, topPos.x, topPos.z);
 				}
 			}
 		}
@@ -44,10 +45,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			}
 		}
 
-		public static List<OreGenerator> GetVanillaOreGenerators(Version gameVersion)
+		public static List<OreGenerator> GetVanillaOreGenerators(GameVersion gameVersion)
 		{
 			var list = new List<OreGenerator>();
-			if(gameVersion >= Version.Release_1(18))
+			if(gameVersion >= GameVersion.Release_1(18))
 			{
 				//TODO: make them match 1.18s non-uniform distribution pattern
 
@@ -93,7 +94,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 				list.Add(new OreGenerator("diamond_ore", 8, 0.35f, 2, 16));
 				list.Add(new OreGenerator("redstone_ore", 10, 1.2f, 4, 16));
 				list.Add(new OreGenerator("lapis_ore", 9, 0.7f, 4, 28));
-				if(gameVersion >= Version.Release_1(17))
+				if(gameVersion >= GameVersion.Release_1(17))
 				{
 					list.Add(new OreGenerator("copper_ore", 10, 12.5f, 0, 72));
 				}
@@ -101,7 +102,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			return list;
 		}
 
-		private Layer CreateLayer(XElement elem, Version gameVersion)
+		private Layer CreateLayer(XElement elem, GameVersion gameVersion)
 		{
 			var layer = new OreGenLayer();
 			foreach(var oreElem in elem.Elements())
@@ -127,10 +128,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			return layer;
 		}
 
-		protected override void OnProcessSurface(World world, BlockCoord topPos, int pass, float mask)
+		protected override void OnProcessSurface(Dimension dim, BlockCoord topPos, int pass, float mask)
 		{
 			//if (topPos.y < 4) return;
-			ProcessSplatmapLayersSurface(layers, weightmap, world, topPos, pass, mask);
+			ProcessSplatmapLayersSurface(layers, weightmap, dim, topPos, pass, mask);
 		}
 	}
 }

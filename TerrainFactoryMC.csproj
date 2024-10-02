@@ -9,7 +9,7 @@
     <PackageId></PackageId>
     <Product />
     <RootNamespace>TerrainFactory.Modules.MC</RootNamespace>
-    <AssemblyName>TerrainFactoryMCModule</AssemblyName>
+    <AssemblyName>TerrainFactoryMC</AssemblyName>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
@@ -49,7 +49,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call $(SolutionDir)\$(SolutionName)\copy_modules.bat $(TargetDir) $(SolutionDir) $(Configuration) $(ProjectName)" />
+    <Exec Command="call &quot;$(SolutionDir)$(SolutionName)\copy_modules.bat&quot; &quot;$(TargetDir)&quot; &quot;$(SolutionDir)&quot; $(Configuration) $(ProjectName)" />
   </Target>
 
 </Project>
