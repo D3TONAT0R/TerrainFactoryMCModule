@@ -5,19 +5,19 @@ using Color = System.Drawing.Color;
 
 namespace TerrainFactory.Modules.MC
 {
-	public class BitmapWrapper : IBitmap
+	public class WFBitmap : IBitmap
 	{
 		public Bitmap bitmap;
 
 		public int Width => bitmap.Width;
 		public int Height => bitmap.Height;
 
-		public BitmapWrapper(int width, int height)
+		public WFBitmap(int width, int height)
 		{
 			bitmap = new Bitmap(width, height);
 		}
 
-		public BitmapWrapper(Bitmap bitmap)
+		public WFBitmap(Bitmap bitmap)
 		{
 			this.bitmap = bitmap;
 		}
@@ -34,12 +34,12 @@ namespace TerrainFactory.Modules.MC
 
 		public IBitmap Clone()
 		{
-			return new BitmapWrapper(new Bitmap(bitmap));
+			return new WFBitmap(new Bitmap(bitmap));
 		}
 
 		public IBitmap CloneArea(int x, int y, int width, int height)
 		{
-			return new BitmapWrapper(bitmap.Clone(new System.Drawing.Rectangle(x, y, width, height), bitmap.PixelFormat));
+			return new WFBitmap(bitmap.Clone(new System.Drawing.Rectangle(x, y, width, height), bitmap.PixelFormat));
 		}
 
 		public void Save(string path)

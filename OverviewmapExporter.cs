@@ -38,7 +38,7 @@ namespace TerrainFactory.Modules.MC
 				OverrideHighPoint = 256
 			};
 			var imap = exporter.world.Overworld.GetSurfaceMap(exporter.worldBounds.xMin, exporter.worldBounds.yMin, heightmap, mcMapStyle);
-			map = ((BitmapWrapper)imap).bitmap;
+			map = ((WFBitmap)imap).bitmap;
 			if(!mcMapStyle)
 			{
 				map = GenerateShadedMap(heightData, map);

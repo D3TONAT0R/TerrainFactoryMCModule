@@ -126,7 +126,7 @@ namespace TerrainFactory.Modules.MC
 		private void CreateWorld(string worldName)
 		{
 			world = World.CreateNew(desiredVersion, worldName);
-			world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.plains,
+			world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.plains, 
 				regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
 			if(generateVoid)
 			{

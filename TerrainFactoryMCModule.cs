@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TerrainFactory.Formats;
+using WorldForge;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -8,19 +9,16 @@ namespace TerrainFactory.Modules.MC
 	{
 		public override string ModuleID => "MinecraftWorldModule";
 		public override string ModuleName => "Minecraft World Generator / Importer";
-		public override string ModuleVersion => "0.9.6";
+		public override string ModuleVersion => "0.9.7";
 
-		public override void RegisterFormats(List<FileFormat> registry)
+		public override void Initialize()
 		{
-			registry.Add(new MCRegionFormat());
-			registry.Add(new MCBetaRegionFormat());
-			registry.Add(new MCRawRegionFormat());
-			registry.Add(new MCWorldFormat());
-		}
-
-		public override IEnumerable<Type> GetCommandDefiningTypes()
-		{
-			yield return typeof(MCCommands);
+			SupportedFormats.Add(new MCRegionFormat());
+			SupportedFormats.Add(new MCBetaRegionFormat());
+			SupportedFormats.Add(new MCRawRegionFormat());
+			SupportedFormats.Add(new MCWorldFormat());
+			CommandDefiningTypes.Add(typeof(MCCommands));
+			WorldForgeManager.Initialize(new WFBitmapFactory());
 		}
 	}
 }
