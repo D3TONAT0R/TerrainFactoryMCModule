@@ -35,12 +35,12 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			random = new Random();
 			rarityMul = float.Parse(xml.Element("multiplier")?.Value ?? "1");
 			var map = xml.Element("map");
-			weightmap = LoadWeightmapAndLayers(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ, layers, (xe) => CreateLayer(xe, context.desiredVersion));
+			weightmap = LoadWeightmapAndLayers(rootPath, xml, offsetX, offsetZ, sizeX, sizeZ, layers, (xe) => CreateLayer(xe, context.targetVersion));
 			if(weightmap == null)
 			{
-				Console.WriteLine($"Generating ores with default settings for version {context.desiredVersion}");
+				Console.WriteLine($"Generating ores with default settings for version {context.targetVersion}");
 				var gen = new OreGenLayer();
-				gen.ores.AddRange(GetVanillaOreGenerators(context.desiredVersion));
+				gen.ores.AddRange(GetVanillaOreGenerators(context.targetVersion));
 				layers.Add(-1, gen);
 			}
 		}

@@ -61,7 +61,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 					return false;
 				}
 
-				if(b != null && !b.CompareMultiple("minecraft:bedrock") && !Blocks.IsLiquid(b))
+				if(b != null && !b.Compare("minecraft:bedrock") && !Blocks.IsLiquid(b))
 				{
 					if(pos.y <= lavaHeight)
 					{

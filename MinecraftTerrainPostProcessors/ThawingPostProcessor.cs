@@ -10,26 +10,26 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 	{
 		public static Dictionary<BiomeID, BiomeID> biomeDeIcingTable = new Dictionary<BiomeID, BiomeID>()
 		{
-			{ BiomeID.snowy_tundra, BiomeID.plains },
-			{ BiomeID.ice_spikes, BiomeID.plains },
-			{ BiomeID.snowy_taiga, BiomeID.taiga },
-			{ BiomeID.snowy_taiga_hills, BiomeID.taiga_hills },
-			{ BiomeID.snowy_taiga_mountains, BiomeID.taiga_mountains },
-			{ BiomeID.snowy_mountains, BiomeID.mountains },
-			{ BiomeID.frozen_river, BiomeID.river },
-			{ BiomeID.frozen_ocean, BiomeID.ocean },
-			{ BiomeID.snowy_beach, BiomeID.beach },
-			{ BiomeID.deep_frozen_ocean, BiomeID.deep_ocean }
+			{BiomeIDs.Get("snowy_tundra"), BiomeIDs.Get("plains")},
+			{BiomeIDs.Get("ice_spikes"), BiomeIDs.Get("plains")},
+			{BiomeIDs.Get("snowy_taiga"), BiomeIDs.Get("taiga")},
+			{BiomeIDs.Get("snowy_taiga_hills"), BiomeIDs.Get("taiga_hills")},
+			{BiomeIDs.Get("snowy_taiga_mountains"), BiomeIDs.Get("taiga_mountains")},
+			{BiomeIDs.Get("snowy_mountains"), BiomeIDs.Get("mountains")},
+			{BiomeIDs.Get("frozen_river"), BiomeIDs.Get("river")},
+			{BiomeIDs.Get("frozen_ocean"), BiomeIDs.Get("ocean")},
+			{BiomeIDs.Get("snowy_beach"), BiomeIDs.Get("beach")},
+			{BiomeIDs.Get("deep_frozen_ocean"), BiomeIDs.Get("deep_ocean") }
 		};
 
-		public static Dictionary<string, string> blockReplacementTable = new Dictionary<string, string>()
+		public static Dictionary<BlockID, BlockID> blockReplacementTable = new Dictionary<BlockID, BlockID>()
 		{
-			{ "minecraft:snow", "minecraft:air" },
-			{ "minecraft:snow_block", "minecraft:air" },
-			{ "minecraft:ice", "minecraft:water" },
-			{ "minecraft:packed_ice", "minecraft:water" },
-			{ "minecraft:blue_ice", "minecraft:water" },
-			{ "minecraft:powder_snow", "minecraft:air" }
+			{BlockList.Find("snow"), BlockList.Find("air")},
+			{BlockList.Find("snow_block"), BlockList.Find("air")},
+			{BlockList.Find("ice"), BlockList.Find("water")},
+			{BlockList.Find("packed_ice"), BlockList.Find("water")},
+			{BlockList.Find("blue_ice"), BlockList.Find("water")},
+			{BlockList.Find("powder_snow"), BlockList.Find("air")}
 		};
 
 		public override PostProcessType PostProcessorType => PostProcessType.Both;
@@ -43,11 +43,11 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		{
 			//Replace snowy biomes with normal biomes
 			var biome = dim.GetBiome(pos.x, pos.z);
-			if(biome.HasValue)
+			if(biome != null)
 			{
-				if(biomeDeIcingTable.ContainsKey(biome.Value))
+				if(biomeDeIcingTable.ContainsKey(biome))
 				{
-					dim.SetBiome(pos.x, pos.z, biomeDeIcingTable[biome.Value]);
+					dim.SetBiome(pos.x, pos.z, biomeDeIcingTable[biome]);
 				}
 			}
 			else
@@ -65,11 +65,11 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			if(block.HasProperty("snowy"))
 			{
 				//Replace block with itself to get rid of the "snowy" property
-				dim.SetBlock(pos, block.block.ID);
+				dim.SetBlock(pos, block.block);
 			}
-			else if(blockReplacementTable.ContainsKey(block.block.ID))
+			else if(blockReplacementTable.TryGetValue(block.block, out var replacement))
 			{
-				dim.SetBlock(pos, blockReplacementTable[block.block.ID]);
+				dim.SetBlock(pos, replacement);
 			}
 		}
 	}

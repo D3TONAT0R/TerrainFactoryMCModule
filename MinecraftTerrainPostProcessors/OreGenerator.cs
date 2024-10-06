@@ -121,7 +121,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 		{
 			if(regular.block.IsVanillaBlock)
 			{
-				switch(regular.block.shortID)
+				switch(regular.block.ID.id)
 				{
 					case "coal_ore":
 					case "iron_ore":
@@ -131,7 +131,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 					case "lapis_ore":
 					case "redstone_ore":
 					case "emerald_ore":
-						return new BlockState("deepslate_" + regular.block.shortID);
+						return new BlockState("deepslate_" + regular.block.ID.id);
 					default: return null;
 				}
 			}

@@ -235,7 +235,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			{
 				if(char.IsDigit(id.Value[0]))
 				{
-					generators.Add(new BiomeGenerator((BiomeID)byte.Parse(id.Value)));
+					generators.Add(new BiomeGenerator(BiomeIDs.GetFromNumeric(byte.Parse(id.Value))));
 				}
 				else
 				{

@@ -18,7 +18,7 @@ namespace TerrainFactory.Modules.MC
 
 		public readonly ExportTask exportTask;
 
-		public GameVersion desiredVersion;
+		public GameVersion targetVersion;
 		public World world;
 		public Dimension Dimension => world.Overworld;
 		public byte[,] heightmap;
@@ -47,11 +47,11 @@ namespace TerrainFactory.Modules.MC
 			generateVoid = task.settings.GetCustomSetting("mcVoidGen", false);
 			if(task.settings.HasCustomSetting<string>("mcVersion"))
 			{
-				desiredVersion = GameVersion.Parse(task.settings.GetCustomSetting("mcVersion", ""));
+				targetVersion = GameVersion.Parse(task.settings.GetCustomSetting("mcVersion", ""));
 			}
 			else
 			{
-				desiredVersion = GameVersion.DefaultVersion;
+				targetVersion = GameVersion.DefaultVersion;
 			}
 			int xmin = regionOffsetX * 512;
 			int zmin = regionOffsetZ * 512;
@@ -125,13 +125,13 @@ namespace TerrainFactory.Modules.MC
 
 		private void CreateWorld(string worldName)
 		{
-			world = World.CreateNew(desiredVersion, worldName);
-			world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.plains, 
+			world = World.CreateNew(targetVersion, worldName);
+			world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.Plains, 
 				regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
 			if(generateVoid)
 			{
 				var gen = new LevelData.SuperflatDimensionGenerator(DimensionID.Overworld, new LevelData.SuperflatLayer("minecraft:air", 1));
-				gen.biome = BiomeID.the_void;
+				gen.biome = BiomeID.TheVoid;
 				gen.features = false;
 				world.LevelData.worldGen.OverworldGenerator = gen;
 			}
@@ -154,7 +154,7 @@ namespace TerrainFactory.Modules.MC
 					for(int z = 0; z < heightmapLengthZ; z++)
 					{
 						int lowest = 0;
-						if(desiredVersion >= GameVersion.Release_1(18))
+						if(targetVersion >= GameVersion.Release_1(18))
 						{
 							lowest = -64;
 							for(int y = -64; y <= heightmap[x, z]; y++)
@@ -190,7 +190,7 @@ namespace TerrainFactory.Modules.MC
 			if(filetype is MCRegionFormat)
 			{
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
-				Dimension.WriteRegionFile(stream, regionOffsetX, regionOffsetZ, desiredVersion);
+				Dimension.WriteRegionFile(stream, regionOffsetX, regionOffsetZ, targetVersion);
 			}
 			else if(filetype is MCWorldFormat)
 			{

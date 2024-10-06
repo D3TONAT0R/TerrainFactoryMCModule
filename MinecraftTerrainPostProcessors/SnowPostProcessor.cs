@@ -23,28 +23,28 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 
 		static Dictionary<BiomeID, short> snowThresholds = new Dictionary<BiomeID, short>()
 		{
-			{BiomeID.snowy_tundra, -999},
-			{BiomeID.ice_spikes, -999 },
-			{BiomeID.snowy_taiga, -999 },
-			{BiomeID.snowy_taiga_hills, -999 },
-			{BiomeID.snowy_taiga_mountains, -999 },
-			{BiomeID.snowy_mountains, -999 },
-			{BiomeID.snowy_beach, -999 },
-			{BiomeID.gravelly_mountains, 128 },
-			{BiomeID.modified_gravelly_mountains, 128 },
-			{BiomeID.mountains, 128 },
-			{BiomeID.mountain_edge, 128 },
-			{BiomeID.taiga_mountains, 128 },
-			{BiomeID.wooded_mountains, 128 },
-			{BiomeID.stone_shore, 128 },
-			{BiomeID.taiga, 168 },
-			{BiomeID.taiga_hills, 168 },
-			{BiomeID.giant_spruce_taiga, 168 },
-			{BiomeID.giant_spruce_taiga_hills, 168 },
-			{BiomeID.giant_tree_taiga, 168 },
-			{BiomeID.giant_tree_taiga_hills, 168 },
-			{BiomeID.frozen_ocean, 72 },
-			{BiomeID.deep_frozen_ocean, 72 },
+			{BiomeIDs.Get("snowy_tundra"), -999},
+			{BiomeIDs.Get("ice_spikes"), -999 },
+			{BiomeIDs.Get("snowy_taiga"), -999 },
+			{BiomeIDs.Get("snowy_taiga_hills"), -999 },
+			{BiomeIDs.Get("snowy_taiga_mountains"), -999 },
+			{BiomeIDs.Get("snowy_mountains"), -999 },
+			{BiomeIDs.Get("snowy_beach"), -999 },
+			{BiomeIDs.Get("gravelly_mountains"), 128 },
+			{BiomeIDs.Get("modified_gravelly_mountains"), 128 },
+			{BiomeIDs.Get("mountains"), 128 },
+			{BiomeIDs.Get("mountain_edge"), 128 },
+			{BiomeIDs.Get("taiga_mountains"), 128 },
+			{BiomeIDs.Get("wooded_mountains"), 128 },
+			{BiomeIDs.Get("stone_shore"), 128 },
+			{BiomeIDs.Get("taiga"), 168 },
+			{BiomeIDs.Get("taiga_hills"), 168 },
+			{BiomeIDs.Get("giant_spruce_taiga"), 168 },
+			{BiomeIDs.Get("giant_spruce_taiga_hills"), 168 },
+			{BiomeIDs.Get("giant_tree_taiga"), 168 },
+			{BiomeIDs.Get("giant_tree_taiga_hills"), 168 },
+			{BiomeIDs.Get("frozen_ocean"), 72 },
+			{BiomeIDs.Get("deep_frozen_ocean"), 72 },
 		};
 
 		public SnowPostProcessor(MCWorldExporter context, string rootPath, XElement xml, int offsetX, int offsetZ, int sizeX, int sizeZ) : base(context, rootPath, xml, offsetX, offsetZ, sizeX, sizeZ)
@@ -66,16 +66,16 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 		protected override void OnProcessSurface(Dimension dim, BlockCoord pos, int pass, float mask)
 		{
 			var biome = dim.GetBiome(pos);
-			if(biome.HasValue)
+			if(biome != null)
 			{
 				if(!topOnly)
 				{
-					FreezeBlock(dim, pos, mask, biome.Value);
+					FreezeBlock(dim, pos, mask, biome);
 				}
 				int y2 = dim.GetHighestBlock(pos.x, pos.z, HeightmapType.SolidBlocks);
 				if(topOnly || y2 > pos.y)
 				{
-					FreezeBlock(dim, (pos.x, y2, pos.z), mask, biome.Value);
+					FreezeBlock(dim, (pos.x, y2, pos.z), mask, biome);
 				}
 			}
 		}
@@ -93,9 +93,9 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			}
 		}
 
-		private void FreezeBlock(Dimension dim, BlockCoord pos, float mask, BiomeID? biome, bool airCheck = true)
+		private void FreezeBlock(Dimension dim, BlockCoord pos, float mask, BiomeID biome, bool airCheck = true)
 		{
-			if(biome.HasValue && !IsAboveBiomeThreshold(biome.Value, pos.y)) return;
+			if(biome != null && !IsAboveBiomeThreshold(biome, pos.y)) return;
 			bool canFreeze = !airCheck || dim.IsAirOrNull(pos.Above);
 			if(!canFreeze) return;
 			var block = dim.GetBlock(pos);
@@ -114,15 +114,15 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 				if(block.IsLiquid || block.CompareMultiple("minecraft:snow", "minecraft:ice")) return;
 				dim.SetBlock(pos.Above, snowLayerBlock);
 				//Add "snowy" tag on blocks that support it.
-				if(block.Compare(snowyGrass.block.ID))
+				if(block == snowyGrass.block)
 				{
 					dim.SetBlock(pos, snowyGrass);
 				}
-				else if(block.Compare(snowyPodzol.block.ID))
+				else if(block == snowyPodzol.block)
 				{
 					dim.SetBlock(pos, snowyPodzol);
 				}
-				else if(block.Compare(snowyMycelium.block.ID))
+				else if(block == snowyMycelium.block)
 				{
 					dim.SetBlock(pos, snowyMycelium);
 				}

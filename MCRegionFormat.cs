@@ -24,7 +24,9 @@ namespace TerrainFactory.Modules.MC
 		{
 			using(var stream = BeginWriteStream(path))
 			{
-				new MCWorldExporter(task, true, true).WriteFile(path, stream, this);
+				var exporter = new MCWorldExporter(task, true, true);
+				exporter.targetVersion = GameVersion.Beta_1(7, 3);
+				exporter.WriteFile(path, stream, this);
 			}
 			return true;
 		}
