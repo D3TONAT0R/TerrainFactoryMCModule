@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Xml.Linq;
 using WorldForge;
+using WorldForge.IO;
 using WorldForge.Regions;
 
 namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
@@ -45,7 +46,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors.Splatmapper
 			var filename = Path.Combine(otherRegionFolder, otherRegionName);
 			if(File.Exists(filename))
 			{
-				var otherRegion = RegionLoader.LoadRegion(filename);
+				var otherRegion = RegionDeserializer.LoadRegion(filename, null);
 				var merger = new RegionMerger(otherRegion, reg, fraction);
 				var mergedRegion = merger.Merge();
 				for(int x = 0; x < 32; x++)

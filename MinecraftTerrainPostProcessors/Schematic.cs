@@ -88,7 +88,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 					for(int x = x1; x < x2; x++)
 					{
 						if(schematic[sx, sy, sz] == 0) continue; //Do not check this block if the result is nothing anyway
-						if(!dim.IsAirOrNull((x, y, z)) || dim.GetRegion(x, z) == null) return true;
+						if(!dim.IsAirOrNull((x, y, z)) || dim.GetRegionAtBlock(x, z) == null) return true;
 						sx++;
 					}
 					sz++;

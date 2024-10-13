@@ -1,5 +1,6 @@
 using System.IO;
 using WorldForge;
+using WorldForge.IO;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -8,7 +9,8 @@ namespace TerrainFactory.Modules.MC
 
 		public static ElevationData ImportHeightmap(string filepath, HeightmapType type)
 		{
-			short[,] hms = RegionLoader.GetHeightmap(filepath, type);
+			var region = RegionDeserializer.LoadRegion(filepath, null);
+			short[,] hms = region.GetHeightmapFromNBT(type);
 			ElevationData data = new ElevationData(512, 512, filepath);
 			for(int x = 0; x < 512; x++)
 			{

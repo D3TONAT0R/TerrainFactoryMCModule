@@ -37,7 +37,7 @@ namespace TerrainFactory.Modules.MC
 				OverrideLowPoint = 0,
 				OverrideHighPoint = 256
 			};
-			var imap = exporter.world.Overworld.GetSurfaceMap(exporter.worldBounds.xMin, exporter.worldBounds.yMin, heightmap, mcMapStyle);
+			var imap = SurfaceMapGenerator.GenerateSurfaceMap(exporter.world.Overworld, exporter.worldBounds.xMin, exporter.worldBounds.yMin, exporter.worldBounds.xMax, exporter.worldBounds.yMax, HeightmapType.SolidBlocks, mcMapStyle);
 			map = ((WFBitmap)imap).bitmap;
 			if(!mcMapStyle)
 			{
