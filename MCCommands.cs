@@ -7,7 +7,7 @@ namespace TerrainFactory.Modules.MC
 	public static class MCCommands
 	{
 		[Command("mc-version", "<Version>", "[MC*] Change target minecraft version")]
-		public static bool RunVersionCmd(Worksheet sheet, string[] args)
+		public static bool RunVersionCmd(Project sheet, string[] args)
 		{
 			if(args.Length > 0)
 			{
@@ -24,7 +24,7 @@ namespace TerrainFactory.Modules.MC
 		}
 
 		[Command("mc-offset", "X Z", "[MC*] Apply offset to region terrain, in regions (512)")]
-		public static bool RunOffsetCmd(Worksheet sheet, string[] args)
+		public static bool RunOffsetCmd(Project sheet, string[] args)
 		{
 			int x = CommandParser.ParseArg<int>(args, 0);
 			int z = CommandParser.ParseArg<int>(args, 1);
@@ -35,7 +35,7 @@ namespace TerrainFactory.Modules.MC
 		}
 
 		[Command("mc-postprocess", "", "[MC*] Run various world generators defined in a separate XML file")]
-		public static bool RunPostProcessingCmd(Worksheet sheet, string[] args)
+		public static bool RunPostProcessingCmd(Project sheet, string[] args)
 		{
 
 			if(args.Length > 0)
@@ -55,7 +55,7 @@ namespace TerrainFactory.Modules.MC
 		}
 
 		[Command("mc-void", "<0/1>", "[MC*] Generate (superflat) void instead of random terrain around the world")]
-		public static bool RunVoidGenCmd(Worksheet sheet, string[] args)
+		public static bool RunVoidGenCmd(Project sheet, string[] args)
 		{
 			bool value;
 			if(args.Length > 0 && int.TryParse(args[0], out int i))
