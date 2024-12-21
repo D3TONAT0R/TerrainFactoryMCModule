@@ -5,7 +5,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using TerrainFactory.Modules.MC.PostProcessors.Splatmapper;
-using WorldForge.Regions;
+using WorldForge;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC.PostProcessors
 {
@@ -179,9 +180,10 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 			}
 		}
 
-		public void DecorateTerrain(MCWorldExporter exporter)
+		public void DecorateTerrain(Dimension dimension, byte[,] heightmap)
 		{
-
+			int heightmapLengthX = heightmap.GetLength(0);
+			int heightmapLengthZ = heightmap.GetLength(1);
 			int processorIndex = 0;
 			foreach(var post in generators)
 			{
@@ -191,43 +193,43 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 					if(post.PostProcessorType == PostProcessType.Block || post.PostProcessorType == PostProcessType.Both)
 					{
 						//Iterate the postprocessors over every block
-						for(int x = 0; x < exporter.heightmapLengthX; x++)
+						for(int x = 0; x < heightmapLengthX; x++)
 						{
-							for(int z = 0; z < exporter.heightmapLengthZ; z++)
+							for(int z = 0; z < heightmapLengthZ; z++)
 							{
 								for(int y = post.BlockProcessYMin; y <= post.BlockProcessYMax; y++)
 								{
-									post.ProcessBlock(exporter.Dimension, (x + exporter.regionOffsetX * 512, y, z + exporter.regionOffsetZ * 512), pass);
+									post.ProcessBlock(dimension, new BlockCoord(x, y, z), pass);
 								}
 							}
-							UpdateProgressBar(processorIndex, "Decorating terrain", name, (x + 1) / (float)exporter.heightmapLengthX, pass, post.NumberOfPasses);
+							UpdateProgressBar(processorIndex, "Decorating terrain", name, (x + 1) / (float)heightmapLengthX, pass, post.NumberOfPasses);
 						}
 					}
 
 					if(post.PostProcessorType == PostProcessType.Surface || post.PostProcessorType == PostProcessType.Both)
 					{
 						//Iterate the postprocessors over every surface block
-						for(int x = 0; x < exporter.heightmapLengthX; x++)
+						for(int x = 0; x < heightmapLengthX; x++)
 						{
-							for(int z = 0; z < exporter.heightmapLengthZ; z++)
+							for(int z = 0; z < heightmapLengthZ; z++)
 							{
-								post.ProcessSurface(exporter.Dimension, (x + exporter.regionOffsetX * 512, exporter.heightmap[x, z], z + exporter.regionOffsetZ * 512), pass);
+								post.ProcessSurface(dimension, new BlockCoord(x, heightmap[x, z], z), pass);
 							}
-							UpdateProgressBar(processorIndex, "Decorating surface", name, (x + 1) / (float)exporter.heightmapLengthX, pass, post.NumberOfPasses);
+							UpdateProgressBar(processorIndex, "Decorating surface", name, (x + 1) / (float)heightmapLengthX, pass, post.NumberOfPasses);
 						}
 					}
 
-					//Run every postprocessor once for every region (rarely used)
-					Parallel.ForEach(exporter.Dimension.regions.Values, reg =>
+					//Run every postprocessor once for every region
+					Parallel.ForEach(dimension.regions.Values, reg =>
 					{
-						post.ProcessRegion(exporter.Dimension, reg, reg.regionPos.x, reg.regionPos.z, pass);
+						post.ProcessRegion(dimension, reg, reg.regionPos.x, reg.regionPos.z, pass);
 					});
 				}
 				processorIndex++;
 			}
 			foreach(var post in generators)
 			{
-				post.OnFinish(exporter.world);
+				post.OnFinish(dimension);
 			}
 		}
 

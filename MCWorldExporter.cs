@@ -13,9 +13,6 @@ namespace TerrainFactory.Modules.MC
 {
 	public class MCWorldExporter
 	{
-
-		public static readonly string defaultBlock = "minecraft:stone";
-
 		public readonly ExportTask exportTask;
 
 		public GameVersion targetVersion;
@@ -123,70 +120,10 @@ namespace TerrainFactory.Modules.MC
 			}
 		}
 
-		private void CreateWorld(string worldName)
-		{
-			world = World.CreateNew(targetVersion, worldName);
-			world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.Plains, 
-				regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX - 1, regionOffsetZ + regionNumZ - 1);
-			if(generateVoid)
-			{
-				var gen = new LevelData.SuperflatDimensionGenerator(DimensionID.Overworld, new LevelData.SuperflatLayer("minecraft:air", 1));
-				gen.biome = BiomeID.TheVoid;
-				gen.features = false;
-				world.LevelData.worldGen.OverworldGenerator = gen;
-			}
-			world.WorldName = worldName;
-			MakeBaseTerrain();
-			DecorateTerrain();
-		}
-
-		private void MakeBaseTerrain()
-		{
-			int progress = 0;
-			int iterations = (int)Math.Ceiling(heightmapLengthX / 16f);
-			BlockState bedrock = new BlockState("bedrock");
-			BlockState deepslate = new BlockState("deepslate");
-			Parallel.For(0, iterations, (int cx) =>
-			{
-				for(int bx = 0; bx < Math.Min(16, heightmapLengthX - cx * 16); bx++)
-				{
-					int x = cx * 16 + bx;
-					for(int z = 0; z < heightmapLengthZ; z++)
-					{
-						int lowest = 0;
-						if(targetVersion >= GameVersion.Release_1(18))
-						{
-							lowest = -64;
-							for(int y = -64; y <= heightmap[x, z]; y++)
-							{
-								Dimension.SetBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), deepslate, true);
-							}
-						}
-						for(int y = 0; y <= heightmap[x, z]; y++)
-						{
-							Dimension.SetDefaultBlock((regionOffsetX * 512 + x, y, regionOffsetZ * 512 + z), true);
-						}
-						Dimension.SetBlock((x, lowest, z), bedrock);
-					}
-				}
-				progress++;
-				ConsoleOutput.UpdateProgressBar("Generating base terrain", progress / (float)iterations);
-			}
-			);
-		}
-
-		public void DecorateTerrain()
-		{
-			if(postProcessor != null)
-			{
-				postProcessor.DecorateTerrain(this);
-			}
-		}
-
 		public void WriteFile(string path, FileStream stream, FileFormat filetype)
 		{
 			string name = Path.GetFileNameWithoutExtension(path);
-			CreateWorld(name);
+			var world = MCWorldGenerator.CreateWorld(name, targetVersion, generateVoid, heightmap, postProcessor, regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX, regionOffsetZ + regionNumZ);
 			if(filetype is MCRegionFormat)
 			{
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);

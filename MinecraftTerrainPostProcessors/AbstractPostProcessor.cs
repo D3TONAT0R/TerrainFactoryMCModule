@@ -177,7 +177,7 @@ namespace TerrainFactory.Modules.MC.PostProcessors
 
 		}
 
-		public virtual void OnFinish(World world)
+		public virtual void OnFinish(Dimension dim)
 		{
 
 		}
