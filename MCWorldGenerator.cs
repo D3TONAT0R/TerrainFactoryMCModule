@@ -17,8 +17,8 @@ public class MCWorldGenerator
 		var world = World.CreateNew(targetVersion, worldName);
 		int regionLowerX = (int)Math.Floor(bounds.xMin / 512f);
 		int regionLowerZ = (int)Math.Floor(bounds.yMin / 512f);
-		int regionUpperX = (int)Math.Ceiling(bounds.xMin / 512f);
-		int regionUpperZ = (int)Math.Ceiling(bounds.yMin / 512f);
+		int regionUpperX = (int)Math.Ceiling(bounds.xMax / 512f);
+		int regionUpperZ = (int)Math.Ceiling(bounds.yMax / 512f);
 		world.Overworld = Dimension.CreateNew(world, DimensionID.Overworld, BiomeID.Plains, regionLowerX, regionLowerZ, regionUpperX, regionUpperZ);
 		if(generateVoid)
 		{
@@ -30,6 +30,10 @@ public class MCWorldGenerator
 		world.WorldName = worldName;
 		CreateBaseTerrain(world.Overworld, targetVersion, heightmap, regionLowerX, regionLowerZ, regionUpperX, regionUpperZ);
 		DecorateTerrain(world.Overworld, postProcessor, heightmap);
+		//Place the player in the middle of the world and enable creative mode
+		world.LevelData.spawnpoint.SetOnSurface((int)bounds.CenterX, (int)bounds.CenterY, world);
+		world.LevelData.gameTypeAndDifficulty.allowCommands = true;
+		world.LevelData.gameTypeAndDifficulty.gameType = Player.GameMode.Creative;
 		return world;
 	}
 

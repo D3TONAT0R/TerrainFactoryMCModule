@@ -42,9 +42,10 @@ namespace TerrainFactory.Modules.MC
 			regionOffsetX = task.exportNumX + task.settings.GetCustomSetting("mcaOffsetX", 0);
 			regionOffsetZ = task.exportNumZ + task.settings.GetCustomSetting("mcaOffsetZ", 0);
 			generateVoid = task.settings.GetCustomSetting("mcVoidGen", false);
-			if(task.settings.HasCustomSetting<string>("mcVersion"))
+			if(task.settings.HasCustomSetting<GameVersion>("mcVersion"))
 			{
-				targetVersion = GameVersion.Parse(task.settings.GetCustomSetting("mcVersion", ""));
+				targetVersion = task.settings.GetCustomSetting<GameVersion>("mcVersion", default);
+				ConsoleOutput.WriteLine("Target version set to: " + targetVersion);
 			}
 			else
 			{
@@ -57,6 +58,7 @@ namespace TerrainFactory.Modules.MC
 			heightmapLengthZ = hmapFlipped.GetLength(1);
 			worldBounds = new Bounds(xmin, zmin, xmin + heightmapLengthX - 1, zmin + heightmapLengthZ - 1);
 			heightmap = new byte[heightmapLengthX, heightmapLengthZ];
+			int heightLimit = targetVersion >= GameVersion.Release_1(17) ? 320 : 255;
 			for(int x = 0; x < heightmapLengthX; x++)
 			{
 				for(int z = 0; z < heightmapLengthZ; z++)
@@ -77,20 +79,21 @@ namespace TerrainFactory.Modules.MC
 			this.exportTask = task;
 			if(customPostProcessing)
 			{
-				string xmlPath;
-				if(task.settings.HasCustomSetting<string>("mcpostfile"))
-				{
-					xmlPath = Path.Combine(Path.GetDirectoryName(task.data.SourceFileName), task.settings.GetCustomSetting("mcpostfile", ""));
-					if(Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
-				}
-				else
-				{
-					xmlPath = Path.ChangeExtension(task.FilePath, null) + "-postprocess.xml";
-				}
+				postProcessor = new WorldPostProcessingStack(this);
 				try
 				{
-					postProcessor = new WorldPostProcessingStack(this);
-					postProcessor.CreateFromXML(task.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+					if(task.settings.HasCustomSetting<string>("mcpostfile"))
+					{
+						var xmlPath = Path.Combine(Path.GetDirectoryName(task.data.SourceFileName), task.settings.GetCustomSetting("mcpostfile", ""));
+						if(Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
+						postProcessor.CreateFromXML(task.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+					}
+					else
+					{
+						postProcessor = new WorldPostProcessingStack(this);
+						postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+						//xmlPath = Path.ChangeExtension(task.FilePath, null) + "-postprocess.xml";
+					}
 				}
 				catch(Exception e)
 				{

@@ -1,5 +1,6 @@
 ﻿using System;
 using TerrainFactory.Commands;
+using WorldForge;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -10,9 +11,9 @@ namespace TerrainFactory.Modules.MC
 		{
 			if(args.Length > 0)
 			{
-				Version v = Version.Parse(args[0]);
+				var v = GameVersion.Parse(args[0]);
 				sheet.exportSettings.SetCustomSetting("mcVersion", v);
-				ConsoleOutput.WriteLine("MC world version set to " + v.ToString());
+				ConsoleOutput.WriteLine("MC world version set to " + v);
 			}
 			else
 			{
