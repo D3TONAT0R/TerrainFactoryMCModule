@@ -123,7 +123,8 @@ namespace TerrainFactory.Modules.MC
 		public void WriteFile(string path, FileStream stream, FileFormat filetype)
 		{
 			string name = Path.GetFileNameWithoutExtension(path);
-			var world = MCWorldGenerator.CreateWorld(name, targetVersion, generateVoid, heightmap, postProcessor, regionOffsetX, regionOffsetZ, regionOffsetX + regionNumX, regionOffsetZ + regionNumZ);
+			var bounds = new Bounds(regionOffsetX * 512, regionOffsetZ * 512, regionOffsetX * 512 + heightmapLengthX - 1, regionOffsetZ * 512 + heightmapLengthZ - 1);
+			var world = MCWorldGenerator.CreateWorld(name, targetVersion, generateVoid, heightmap, postProcessor, bounds);
 			if(filetype is MCRegionFormat)
 			{
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);

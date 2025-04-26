@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
+﻿using ImageMagick;
 using System.IO;
 using TerrainFactory.Modules.Bitmaps;
 using TerrainFactory.Util;
@@ -10,7 +9,7 @@ namespace TerrainFactory.Modules.MC
 	public class OverviewmapExporter
 	{
 
-		Bitmap map;
+		MagickImage map;
 
 		/*
 		public OverviewmapExporter(string regionPath, bool mcMapStyle)
@@ -38,21 +37,41 @@ namespace TerrainFactory.Modules.MC
 				OverrideHighPoint = 256
 			};
 			var imap = SurfaceMapGenerator.GenerateSurfaceMap(exporter.world.Overworld, exporter.worldBounds.xMin, exporter.worldBounds.yMin, exporter.worldBounds.xMax, exporter.worldBounds.yMax, HeightmapType.SolidBlocks, mcMapStyle);
-			map = ((WFBitmap)imap).bitmap;
+			map = ToMagickImage(imap);
 			if(!mcMapStyle)
 			{
 				map = GenerateShadedMap(heightData, map);
 			}
 		}
 
-		private Bitmap GenerateShadedMap(ElevationData data, Bitmap surface)
+		private MagickImage ToMagickImage(IBitmap bitmap)
+		{
+			var image = new MagickImage(MagickColors.Black, bitmap.Width, bitmap.Height);
+			var pixels = image.GetPixels();
+			var channels = new float[4];
+			for(int x = 0; x < bitmap.Width; x++)
+			{
+				for(int y = 0; y < bitmap.Height; y++)
+				{
+					var c = bitmap.GetPixel(x, y);
+					channels[0] = c.r / 255f;
+					channels[1] = c.g / 255f;
+					channels[2] = c.b / 255f;
+					channels[3] = c.a / 255f;
+					pixels.SetPixel(x, bitmap.Height - y - 1, channels);
+				}
+			}
+			return image;
+		}
+
+		private MagickImage GenerateShadedMap(ElevationData data, MagickImage surface)
 		{
 			return ImageExporter.GenerateCompositeMap(data, surface, 0.3f, 0.3f);
 		}
 
 		public void WriteFile(FileStream stream, string path)
 		{
-			map.Save(stream, ImageFormat.Png);
+			map.Write(stream, MagickFormat.Png);
 		}
 	}
 }
