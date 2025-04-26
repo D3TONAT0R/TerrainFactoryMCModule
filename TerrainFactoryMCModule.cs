@@ -18,7 +18,7 @@ namespace TerrainFactory.Modules.MC
 			SupportedFormats.Add(new MCRawRegionFormat());
 			SupportedFormats.Add(new MCWorldFormat());
 			CommandDefiningTypes.Add(typeof(MCCommands));
-			WorldForgeManager.Initialize(new WFBitmapFactory());
+			WorldForgeManager.Initialize();
 		}
 	}
 }

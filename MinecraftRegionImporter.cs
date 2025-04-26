@@ -9,7 +9,7 @@ namespace TerrainFactory.Modules.MC
 
 		public static ElevationData ImportHeightmap(string filepath, HeightmapType type)
 		{
-			var region = RegionDeserializer.LoadRegion(filepath, null);
+			var region = RegionDeserializer.LoadMainRegion(filepath, null);
 			short[,] hms = region.GetHeightmapFromNBT(type);
 			ElevationData data = new ElevationData(512, 512, filepath);
 			for(int x = 0; x < 512; x++)

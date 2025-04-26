@@ -36,7 +36,7 @@ namespace TerrainFactory.Modules.MC
 				OverrideLowPoint = 0,
 				OverrideHighPoint = 256
 			};
-			var imap = SurfaceMapGenerator.GenerateSurfaceMap(exporter.world.Overworld, exporter.worldBounds.xMin, exporter.worldBounds.yMin, exporter.worldBounds.xMax, exporter.worldBounds.yMax, HeightmapType.SolidBlocks, mcMapStyle);
+			var imap = SurfaceMapGenerator.GenerateSurfaceMap(exporter.world.Overworld, exporter.worldBounds, HeightmapType.SolidBlocks, mcMapStyle);
 			map = ToMagickImage(imap);
 			if(!mcMapStyle)
 			{

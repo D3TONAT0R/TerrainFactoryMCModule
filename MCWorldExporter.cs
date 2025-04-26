@@ -1,13 +1,10 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using TerrainFactory.Export;
 using TerrainFactory.Formats;
-using TerrainFactory.Modules.MC.PostProcessors;
 using TerrainFactory.Util;
 using WorldForge;
-using WorldForge.Biomes;
+using WorldForge.Builders.PostProcessors;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -18,7 +15,7 @@ namespace TerrainFactory.Modules.MC
 		public GameVersion targetVersion;
 		public World world;
 		public Dimension Dimension => world.Overworld;
-		public byte[,] heightmap;
+		public short[,] heightmap;
 
 		public bool generateOverviewMap = false;
 
@@ -32,9 +29,9 @@ namespace TerrainFactory.Modules.MC
 		public int heightmapLengthX;
 		public int heightmapLengthZ;
 
-		public Bounds worldBounds;
+		public Boundary worldBounds;
 
-		public WorldPostProcessingStack postProcessor = null;
+		public PostProcessingChain postProcessor = null;
 
 		public MCWorldExporter(ExportTask task)
 		{
@@ -56,14 +53,14 @@ namespace TerrainFactory.Modules.MC
 			var hmapFlipped = task.data.GetDataGridYFlipped();
 			heightmapLengthX = hmapFlipped.GetLength(0);
 			heightmapLengthZ = hmapFlipped.GetLength(1);
-			worldBounds = new Bounds(xmin, zmin, xmin + heightmapLengthX - 1, zmin + heightmapLengthZ - 1);
-			heightmap = new byte[heightmapLengthX, heightmapLengthZ];
-			int heightLimit = targetVersion >= GameVersion.Release_1(17) ? 320 : 255;
+			worldBounds = new Boundary(xmin, zmin, xmin + heightmapLengthX - 1, zmin + heightmapLengthZ - 1);
+			heightmap = new short[heightmapLengthX, heightmapLengthZ];
+			short heightLimit = (short)(targetVersion >= GameVersion.Release_1(17) ? 320 : 255);
 			for(int x = 0; x < heightmapLengthX; x++)
 			{
 				for(int z = 0; z < heightmapLengthZ; z++)
 				{
-					heightmap[x, z] = (byte)MathUtils.Clamp((float)Math.Round(hmapFlipped[x, z], MidpointRounding.AwayFromZero), 0, 255);
+					heightmap[x, z] = (short)MathUtils.Clamp((float)Math.Round(hmapFlipped[x, z], MidpointRounding.AwayFromZero), 0, heightLimit);
 				}
 			}
 			regionNumX = (int)Math.Ceiling(heightmapLengthX / 512f);
@@ -79,19 +76,18 @@ namespace TerrainFactory.Modules.MC
 			this.exportTask = task;
 			if(customPostProcessing)
 			{
-				postProcessor = new WorldPostProcessingStack(this);
+				postProcessor = new PostProcessingChain();
 				try
 				{
 					if(task.settings.HasCustomSetting<string>("mcpostfile"))
 					{
 						var xmlPath = Path.Combine(Path.GetDirectoryName(task.data.SourceFileName), task.settings.GetCustomSetting("mcpostfile", ""));
 						if(Path.GetExtension(xmlPath).Length == 0) xmlPath += ".xml";
-						postProcessor.CreateFromXML(task.FilePath, xmlPath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+						postProcessor.CreateFromXML(task.FilePath, xmlPath);
 					}
 					else
 					{
-						postProcessor = new WorldPostProcessingStack(this);
-						postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+						postProcessor.CreateDefaultOverworldChain();
 						//xmlPath = Path.ChangeExtension(task.FilePath, null) + "-postprocess.xml";
 					}
 				}
@@ -100,8 +96,8 @@ namespace TerrainFactory.Modules.MC
 					if(useDefaultPostProcessing)
 					{
 						ConsoleOutput.WriteWarning("Failed to create post processing stack from xml, falling back to default post processing stack. " + e.Message);
-						postProcessor = new WorldPostProcessingStack(this);
-						postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+						postProcessor = new PostProcessingChain();
+						postProcessor.CreateDefaultOverworldChain();
 					}
 					else
 					{
@@ -111,9 +107,10 @@ namespace TerrainFactory.Modules.MC
 			}
 			else if(useDefaultPostProcessing)
 			{
-				postProcessor = new WorldPostProcessingStack(this);
-				postProcessor.CreateDefaultPostProcessor(task.FilePath, 255, regionOffsetX * 512, regionOffsetZ * 512, task.data.CellCountX, task.data.CellCountY);
+				postProcessor = new PostProcessingChain();
+				postProcessor.CreateDefaultOverworldChain();
 			}
+			/*
 			if(task.settings.GetCustomSetting("mcAnalyzeBlocks", false))
 			{
 				if(!postProcessor.ContinsGeneratorOfType(typeof(BlockDistributionAnalysisPostProcessor)))
@@ -121,6 +118,7 @@ namespace TerrainFactory.Modules.MC
 					postProcessor.generators.Add(new BlockDistributionAnalysisPostProcessor(this, XElement.Parse("<null />")));
 				}
 			}
+			*/
 		}
 
 		public void WriteFile(string path, FileStream stream, FileFormat filetype)
@@ -131,7 +129,8 @@ namespace TerrainFactory.Modules.MC
 			if(filetype is MCRegionFormat)
 			{
 				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
-				Dimension.WriteRegionFile(stream, regionOffsetX, regionOffsetZ, targetVersion);
+				//TODO: export single region to stream
+				//Dimension.GetRegion(stream, regionOffsetX, regionOffsetZ, targetVersion);
 			}
 			else if(filetype is MCWorldFormat)
 			{
@@ -147,7 +146,7 @@ namespace TerrainFactory.Modules.MC
 						mapExporter.WriteFile(mapStream, mapPath);
 					}
 				}
-				world.WriteWorldSave(path);
+				world.Save(path);
 			}
 			else
 			{
@@ -157,7 +156,7 @@ namespace TerrainFactory.Modules.MC
 
 		public short[,] GetHeightmap(HeightmapType type, bool keepFlippedZ)
 		{
-			var hm = Dimension.GetHeightmap(worldBounds.xMin, worldBounds.yMin, worldBounds.xMax, worldBounds.yMax, type);
+			var hm = Dimension.GetHeightmap(worldBounds, type);
 			if(!keepFlippedZ)
 			{
 				hm = ArrayConverter.Flip(hm);
