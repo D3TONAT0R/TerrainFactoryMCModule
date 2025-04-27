@@ -46,7 +46,7 @@ namespace TerrainFactory.Modules.MC
 
 		private MagickImage ToMagickImage(IBitmap bitmap)
 		{
-			var image = new MagickImage(MagickColors.Black, bitmap.Width, bitmap.Height);
+			var image = new MagickImage(MagickColors.Black, (uint)bitmap.Width, (uint)bitmap.Height);
 			var pixels = image.GetPixels();
 			var channels = new float[4];
 			for(int x = 0; x < bitmap.Width; x++)

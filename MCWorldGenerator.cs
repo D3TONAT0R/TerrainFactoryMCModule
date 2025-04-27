@@ -32,7 +32,7 @@ public class MCWorldGenerator
 		//Place the player in the middle of the world and enable creative mode
 		world.LevelData.spawnpoint.SetOnSurface((int)bounds.CenterX, (int)bounds.CenterY, world);
 		world.LevelData.gameTypeAndDifficulty.allowCommands = true;
-		world.LevelData.gameTypeAndDifficulty.gameType = Player.GameMode.Creative;
+		world.SetGameMode(Player.GameMode.Creative, true);
 		return world;
 	}
 
