@@ -13,10 +13,8 @@ namespace TerrainFactory.Modules.MC
 
 		protected override bool ExportFile(string path, ExportTask task)
 		{
-			using(var stream = BeginWriteStream(path))
-			{
-				new MCWorldExporter(task, false, false).WriteFile(path, stream, this);
-			}
+			var exporter = new MCWorldExporter(task, false, false);
+			exporter.WriteFile(path, null, this);
 			return true;
 		}
 	}

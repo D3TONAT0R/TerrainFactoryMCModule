@@ -5,6 +5,7 @@ using TerrainFactory.Formats;
 using TerrainFactory.Util;
 using WorldForge;
 using WorldForge.Builders.PostProcessors;
+using WorldForge.Coordinates;
 
 namespace TerrainFactory.Modules.MC
 {
@@ -128,9 +129,11 @@ namespace TerrainFactory.Modules.MC
 			var world = MCWorldGenerator.CreateWorld(name, targetVersion, generateVoid, heightmap, postProcessor, bounds);
 			if(filetype is MCRegionFormat)
 			{
-				if(postProcessor != null) postProcessor.OnCreateWorldFiles(path);
-				//TODO: export single region to stream
-				//Dimension.GetRegion(stream, regionOffsetX, regionOffsetZ, targetVersion);
+				postProcessor?.OnCreateWorldFiles(path);
+				var region = world.Overworld.GetRegion(new RegionLocation(regionOffsetX, regionOffsetZ));
+				var directory = Path.GetDirectoryName(path);
+				var filename = Path.GetFileName(path);
+				region.SaveMainRegionFile(directory, targetVersion, filename);
 			}
 			else if(filetype is MCWorldFormat)
 			{

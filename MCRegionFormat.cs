@@ -22,12 +22,8 @@ namespace TerrainFactory.Modules.MC
 
 		protected override bool ExportFile(string path, ExportTask task)
 		{
-			using(var stream = BeginWriteStream(path))
-			{
-				var exporter = new MCWorldExporter(task, true, true);
-				exporter.targetVersion = GameVersion.Beta_1(7, 3);
-				exporter.WriteFile(path, stream, this);
-			}
+			var exporter = new MCWorldExporter(task, true, true);
+			exporter.WriteFile(path, null, this);
 			return true;
 		}
 

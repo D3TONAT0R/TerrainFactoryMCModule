@@ -21,10 +21,9 @@ namespace TerrainFactory.Modules.MC
 			}
 			data.SourceFileName = Path.GetFileNameWithoutExtension(filepath);
 			data.CellSize = 1;
-			data.NoDataValue = -9999;
 			data.RecalculateElevationRange(false);
-			data.OverrideLowPoint = 0;
-			data.OverrideHighPoint = 255;
+			data.CustomBlackPoint = 0;
+			data.CustomWhitePoint = 255;
 			ConsoleOutput.WriteLine("Lowest: " + data.MinElevation);
 			ConsoleOutput.WriteLine("Hightest: " + data.MaxElevation);
 			return data;

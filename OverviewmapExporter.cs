@@ -33,8 +33,8 @@ namespace TerrainFactory.Modules.MC
 			var heightmap = exporter.GetHeightmap(type, true);
 			ElevationData heightData = new ElevationData(ArrayConverter.ToFloatMap(ArrayConverter.Flip(heightmap)), 1)
 			{
-				OverrideLowPoint = 0,
-				OverrideHighPoint = 256
+				CustomBlackPoint = 0,
+				CustomWhitePoint = 256
 			};
 			var imap = SurfaceMapGenerator.GenerateSurfaceMap(exporter.world.Overworld, exporter.worldBounds, HeightmapType.SolidBlocks, mcMapStyle);
 			map = ToMagickImage(imap);
@@ -66,7 +66,7 @@ namespace TerrainFactory.Modules.MC
 
 		private MagickImage GenerateShadedMap(ElevationData data, MagickImage surface)
 		{
-			return ImageExporter.GenerateCompositeMap(data, surface, 0.3f, 0.3f);
+			return ImageGenerator.GenerateCompositeMap(data, surface, 0.3f, 0.3f);
 		}
 
 		public void WriteFile(FileStream stream, string path)
