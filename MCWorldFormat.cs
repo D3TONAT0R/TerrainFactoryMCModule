@@ -7,7 +7,7 @@ namespace TerrainFactory.Modules.MC
 	{
 		public override string Identifier => "MCW";
 		public override string ReadableName => "Minecraft World";
-		public override string CommandKey => "mcw";
+		public override string Command => "mcw";
 		public override string Description => ReadableName;
 		public override string Extension => "";
 		public override FileSupportFlags SupportedActions => FileSupportFlags.Export;

@@ -9,7 +9,7 @@ namespace TerrainFactory.Modules.MC
 	{
 		public override string Identifier => "MCR";
 		public override string ReadableName => "Minecraft Region";
-		public override string CommandKey => "mcr";
+		public override string Command => "mcr";
 		public override string Description => ReadableName;
 		public override string Extension => "mca";
 		public override FileSupportFlags SupportedActions => FileSupportFlags.ImportAndExport;
